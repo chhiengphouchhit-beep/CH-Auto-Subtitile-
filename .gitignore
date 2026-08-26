@@ -1,0 +1,9 @@
+node_modules/
+uploads/
+.env
+*.mp4
+*.png
+*.wav
+*.ass
+test_*.js
+kantumruy_test.*

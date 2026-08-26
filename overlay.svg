@@ -1,0 +1,22 @@
+<svg width="1080" height="1920" xmlns="http://www.w3.org/2000/svg">
+      <style>
+        @font-face {
+          font-family: 'NotoSansKhmer';
+          src: url('file://D:/khmer-caption-studio/fonts/NotoSansKhmer-Bold.ttf');
+        }
+        .cap-box {
+          fill: rgba(0, 0, 0, 0.8);
+          rx: 12px;
+        }
+        .cap-text {
+          font-family: 'Noto Sans Khmer', 'Khmer OS Battambang', sans-serif;
+          font-size: 56px;
+          font-weight: bold;
+          fill: #ffe066;
+          text-anchor: middle;
+          dominant-baseline: middle;
+        }
+      </style>
+      <rect x="100" y="1600" width="880" height="120" rx="16" fill="rgba(0,0,0,0.85)" />
+      <text x="540" y="1660" class="cap-text">ការសម្រេចចិត្តនិងការដោះស្រាយបញ្ហា</text>
+    </svg>

@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Khmer Caption Studio</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+Khmer:wght@400;600;700;900&family=Kantumruy+Pro:ital,wght@0,100..700;1,100..700&family=Koh+Santepheap:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-dot"></span>
+      Khmer Caption Studio
+      <span class="developer-tag">App Developed By <strong>CHHIT</strong> ✨</span>
+    </div>
+    <div class="topbar-actions">
+      <div id="live-online-badge" class="live-online-tag" title="ចំនួនអ្នកកំពុងប្រើប្រាស់ក្នុងកម្មវិធីពេលនេះ">
+        <span class="pulse-dot"></span>
+        <span id="online-count-text">1 Online</span>
+      </div>
+      <div class="key-control-group">
+        <input type="password" id="access-key-input" placeholder="🔑 Access Key (or CHHIT)" class="key-input-field" value="CHHIT" />
+        <span id="key-status-badge" class="key-status-tag">Key Active</span>
+      </div>
+      <button id="admin-panel-btn" class="btn btn-ghost btn-sm admin-panel-trigger" title="CHHIT Admin Access Manager">
+        👑 CHHIT Admin
+      </button>
+      <span id="model-badge" class="badge">checking model…</span>
+      <div class="export-dropdown" id="export-dropdown">
+        <button id="export-main-btn" class="btn btn-primary export-trigger" disabled>
+          <span>Export Options</span>
+          <span class="caret">▾</span>
+        </button>
+        <div class="dropdown-menu" id="export-menu">
+          <button class="dropdown-item" id="export-srt-btn">
+            <span class="icon">📄</span>
+            <div class="item-text">
+              <span class="item-title">Export .SRT Subtitles</span>
+              <span class="item-desc">ឯកសារ Caption សម្រាប់ CapCut, Premiere...</span>
+            </div>
+          </button>
+          <button class="dropdown-item" id="export-video-btn">
+            <span class="icon">🎬</span>
+            <div class="item-text">
+              <span class="item-title">Export Video with Captions</span>
+              <span class="item-desc">Render Caption រួចជាស្រេចលើវីដេអូ (.MP4)</span>
+            </div>
+          </button>
+          <button class="dropdown-item" id="export-greenscreen-btn">
+            <span class="icon">🟩</span>
+            <div class="item-text">
+              <span class="item-title">Export Green Screen Video</span>
+              <span class="item-desc">វីដេអូ Green Screen (#00FF00) សម្រាប់យកទៅ Key ក្នុង CapCut/Premiere</span>
+            </div>
+          </button>
+          <button class="dropdown-item" id="export-screenshot-btn">
+            <span class="icon">📸</span>
+            <div class="item-text">
+              <span class="item-title">Export Screenshot</span>
+              <span class="item-desc">រូបភាព Screenshot រួមជាមួយ Caption (.PNG)</span>
+            </div>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="layout">
+    <section class="preview-pane">
+      <div class="video-shell">
+        <video id="video" controls></video>
+        <div id="caption-overlay" class="caption-overlay">
+          <span id="caption-overlay-text" class="caption-overlay-text"></span>
+        </div>
+        <div id="video-empty" class="video-empty">
+          <p>ផ្ទុកឡើងវីដេអូ ឬ audio ដើម្បីចាប់ផ្តើម</p>
+          <label class="btn btn-primary">
+            ជ្រើសរើសឯកសារ
+            <input id="file-input" type="file" accept="video/*,audio/*" hidden />
+          </label>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-label">Caption Style (កំណត់ស្ទីលអក្សរ)</div>
+        <div class="style-grid">
+          <div class="style-group">
+            <label class="style-label" for="font-family-select">Font Family</label>
+            <select id="font-family-select" class="style-select">
+              <option value="Noto Sans Khmer" selected>Noto Sans Khmer (Recommended)</option>
+              <option value="Kantumruy Pro">Kantumruy Pro</option>
+              <option value="Koh Santepheap">Koh Santepheap</option>
+            </select>
+          </div>
+
+          <div class="style-group">
+            <label class="style-label" for="font-color-picker">Text Color</label>
+            <div class="color-picker-group">
+              <input type="color" id="font-color-picker" value="#ffe066" class="color-picker-input" />
+              <span id="font-color-label" class="color-hex-label">#FFE066</span>
+            </div>
+          </div>
+
+
+
+          <div class="style-group">
+            <label class="style-label" for="font-bg-style-select">Background Shape</label>
+            <select id="font-bg-style-select" class="style-select">
+              <option value="pill" selected>Translucent Black Pill</option>
+              <option value="none">None (No Box)</option>
+              <option value="solid-black">Solid Black Box</option>
+              <option value="solid-white">Solid White Box</option>
+              <option value="custom">Custom Color Box</option>
+            </select>
+          </div>
+
+          <div class="style-group" id="bg-custom-color-group" style="display:none;">
+            <label class="style-label" for="font-bg-color-picker">BG Box Color</label>
+            <div class="color-picker-group">
+              <input type="color" id="font-bg-color-picker" value="#000000" class="color-picker-input" />
+              <span id="font-bg-color-label" class="color-hex-label">#000000</span>
+            </div>
+          </div>
+
+          <div class="style-group">
+            <label class="style-label" for="font-size-select">Font Size</label>
+            <select id="font-size-select" class="style-select">
+              <option value="small">Small (តូច)</option>
+              <option value="medium" selected>Medium (មធ្យម - 48px)</option>
+              <option value="large">Large (ធំ - 60px)</option>
+              <option value="xlarge">Extra Large (ធំខ្លាំង - 72px)</option>
+            </select>
+          </div>
+
+          <div class="style-group style-group-full">
+            <div class="style-label-row">
+              <label class="style-label" for="font-position-slider">Vertical Position (ទីតាំងអក្សរ)</label>
+              <span id="font-position-val" class="style-val-badge">12%</span>
+            </div>
+            <div class="slider-row">
+              <input type="range" id="font-position-slider" min="5" max="85" value="12" step="1" class="style-slider" />
+              <div class="preset-btns">
+                <button type="button" id="pos-preset-bottom" class="btn-preset is-active">Bottom (12%)</button>
+                <button type="button" id="pos-preset-center" class="btn-preset">Center (45%)</button>
+                <button type="button" id="pos-preset-top" class="btn-preset">Top (78%)</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="tools-row">
+          <button type="button" id="clean-spaces-btn" class="btn btn-ghost btn-sm">
+            ✨ លុប Space រវាងពាក្យខ្មែរ (Clean Khmer Spaces)
+          </button>
+        </div>
+        </div>
+
+        <div class="panel-label">Audio & Subtitle Mode (ជ្រើសរើសភាសានិយាយ និង Caption)</div>
+        <select id="language-select" class="style-select lang-select-main">
+          <option value="km" selected>🇰🇭 ភាសាខ្មែរ ➔ Caption ខ្មែរ (Khmer Audio to Khmer)</option>
+          <option value="km_to_en">🔄 បកប្រែខ្មែរ ➔ Caption អង់គ្លេស (Khmer Audio -> English Translation)</option>
+          <option value="en">🇺🇸 English ➔ Caption អង់គ្លេស (English Audio to English)</option>
+          <option value="auto">🌐 Auto Detect (ខ្មែរ & English)</option>
+        </select>
+
+        <div class="panel-label">Accuracy context</div>
+        <textarea id="context-input" placeholder="ប្រាប់ថាវីដេអូនេះនិយាយអំពីអ្វី — ជួយកែពាក្យបញ្ចេញឲ្យត្រូវ (ឧ. &quot;និយាយអំពី minting collection&quot;)"></textarea>
+
+        <div class="panel-label">Protected vocabulary</div>
+        <div id="glossary-tags" class="tag-input">
+          <input id="glossary-input" type="text" placeholder="វាយពាក្យ ឬឈ្មោះម៉ាក រួចចុច Enter" />
+        </div>
+
+        <button id="generate-btn" class="btn btn-primary btn-block" disabled>Generate accurate captions</button>
+        <p id="status-line" class="status-line"></p>
+      </div>
+    </section>
+
+    <aside class="timeline-pane">
+      <div class="timeline-head">
+        <span>Timeline captions</span>
+        <span id="caption-count" class="count">0</span>
+      </div>
+      <div id="captions-list" class="captions-list">
+        <p class="empty-hint">Caption នឹងបង្ហាញនៅទីនេះ បន្ទាប់ពី Generate។</p>
+      </div>
+    </aside>
+  </main>
+
+  <!-- Cute Export Progress Modal -->
+  <div id="export-modal" class="export-modal-backdrop" hidden>
+    <div class="export-modal-card cute-card">
+      <div class="cute-sparkles">
+        <span class="sparkle s1">✨</span>
+        <span class="sparkle s2">💖</span>
+        <span class="sparkle s3">🌟</span>
+        <span class="sparkle s4">🎬</span>
+      </div>
+
+      <div class="cute-icon-wrapper">
+        <div class="cute-icon-bounce">🎬</div>
+        <div class="cute-spinner-ring"></div>
+      </div>
+
+      <h3 class="export-modal-title cute-title" id="export-modal-title">✨ កំពុងបង្កើត Magic Video... ✨</h3>
+      <p class="export-modal-sub cute-sub" id="export-modal-sub">
+        កំពុងរៀបចំជើងអក្សរខ្មែរ <span id="export-font-name" class="cute-font-badge">Kantumruy Pro</span> យ៉ាងស្អាតឥតខ្ចោះ...
+      </p>
+
+      <div class="export-progress-track cute-track">
+        <div id="export-progress-bar" class="export-progress-fill cute-fill" style="width: 0%;">
+          <div class="progress-shimmer"></div>
+        </div>
+      </div>
+
+      <div class="export-progress-status cute-status">
+        <span id="export-progress-text" class="cute-pct-badge">0%</span>
+        <span id="export-status-label" class="cute-status-text">🌸 កំពុងរៀបចំ...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cute Generate Progress Modal -->
+  <div id="generate-modal" class="export-modal-backdrop" hidden>
+    <div class="export-modal-card cute-card generate-card">
+      <div class="cute-sparkles">
+        <span class="sparkle s1">🪄</span>
+        <span class="sparkle s2">✨</span>
+        <span class="sparkle s3">🎙️</span>
+        <span class="sparkle s4">💖</span>
+      </div>
+
+      <div class="cute-icon-wrapper">
+        <div class="cute-icon-bounce">🤖</div>
+        <div class="cute-spinner-ring ai-ring"></div>
+      </div>
+
+      <h3 class="export-modal-title cute-title gen-title">✨ Gemini AI Magic Captions... ✨</h3>
+      <p class="export-modal-sub cute-sub">
+        កំពុងវិភាគសំឡេង និងបង្កើត <span class="cute-font-badge ai-badge">Khmer Captions</span> យ៉ាងសុក្រឹត...
+      </p>
+
+      <div class="export-progress-track cute-track">
+        <div id="generate-progress-bar" class="export-progress-fill cute-fill ai-fill" style="width: 0%;">
+          <div class="progress-shimmer"></div>
+        </div>
+      </div>
+
+      <div class="export-progress-status cute-status">
+        <span id="generate-progress-text" class="cute-pct-badge ai-pct">0%</span>
+        <span id="generate-status-label" class="cute-status-text">🎙️ កំពុងស្ដាប់សំឡេង...</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHHIT Admin Access Manager Modal -->
+  <div id="admin-modal" class="export-modal-backdrop" hidden>
+    <div class="export-modal-card cute-card admin-card">
+      <div class="admin-modal-header">
+        <h3 class="cute-title admin-title">👑 CHHIT Admin Access Manager</h3>
+        <button id="close-admin-btn" class="close-admin-btn">✕</button>
+      </div>
+      <p class="cute-sub">គ្រប់គ្រង និង ផ្តល់សិទ្ធិប្រើប្រាស់ (Approve Keys & Limit Usage) ដល់ User ផ្សេងៗ</p>
+
+      <div class="admin-live-box">
+        <div class="admin-live-title">
+          <span>🟢 អ្នកកំពុងរត់ប្រើប្រាស់ក្នុង App ពេលនេះ (Live Active Users):</span>
+          <span id="admin-online-count" class="cute-font-badge live-count-badge">1</span>
+        </div>
+        <div id="admin-online-users-list" class="admin-online-chips">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <div class="admin-create-box">
+        <input type="text" id="new-user-name" placeholder="ឈ្មោះ User (ឧ. Sothea)" class="admin-input-text" />
+        <select id="new-user-limit" class="admin-select-limit">
+          <option value="5">សិទ្ធិ Export 5 វីដេអូ</option>
+          <option value="10">សិទ្ធិ Export 10 វីដេអូ</option>
+          <option value="20">សិទ្ធិ Export 20 វីដេអូ</option>
+          <option value="-1">Unlimited ♾️ (មិនកំណត់)</option>
+        </select>
+        <button id="create-key-btn" class="btn btn-primary btn-sm">➕ បង្កើត Access Key</button>
+      </div>
+
+      <div class="admin-table-container">
+        <table class="admin-keys-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Access Key</th>
+              <th>Limit / Used</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="keys-list-body">
+            <!-- Dynamically populated by app.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

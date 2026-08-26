@@ -1,0 +1,16 @@
+{
+  "CHHIT-ADMIN-VIP": {
+    "userName": "CHHIT (Admin)",
+    "limit": -1,
+    "used": 0,
+    "status": "approved",
+    "createdAt": "2026-08-26T08:39:55.350Z"
+  },
+  "CHHIT-SAMNANG-4510": {
+    "userName": "Samnang",
+    "limit": 5,
+    "used": 0,
+    "status": "approved",
+    "createdAt": "2026-08-26T08:57:06.384Z"
+  }
+}
