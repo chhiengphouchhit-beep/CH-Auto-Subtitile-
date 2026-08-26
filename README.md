@@ -5,6 +5,7 @@
 ![License](https://img.shields.io/badge/License-MIT-blue.svg)
 ![Node](https://img.shields.io/badge/Node.js-v18%2B-green.svg)
 ![Gemini](https://img.shields.io/badge/AI-Gemini%20Flash-gold.svg)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/chhiengphouchhit-beep/CH-Auto-Subtitile-)
 
 **CH-Auto-Subtitile-** is a modern, high-performance web application designed for automatic video transcription, subtitle generation, and video burning with **100% accurate Khmer OpenType font shaping** (HarfBuzz engine), cute animated progress modals, multi-language AI translation, and built-in Admin User Access Control.
 
