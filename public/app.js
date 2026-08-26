@@ -10,6 +10,7 @@ const state = {
     strokeWidth: 'none',
     bgStyle: 'pill',
     bgColor: '#000000',
+    bgOpacity: 78,
     fontSizeOption: 'medium',
     position: 'bottom',
     posYPercent: 12,
@@ -41,6 +42,12 @@ const el = {
   bgCustomColorGroup: document.getElementById('bg-custom-color-group'),
   fontBgColorPicker: document.getElementById('font-bg-color-picker'),
   fontBgColorLabel: document.getElementById('font-bg-color-label'),
+  fontBgOpacitySlider: document.getElementById('font-bg-opacity-slider'),
+  fontBgOpacityVal: document.getElementById('font-bg-opacity-val'),
+  opacityPreset0: document.getElementById('opacity-preset-0'),
+  opacityPreset50: document.getElementById('opacity-preset-50'),
+  opacityPreset78: document.getElementById('opacity-preset-78'),
+  opacityPreset100: document.getElementById('opacity-preset-100'),
   fontSizeSelect: document.getElementById('font-size-select'),
   fontPositionSlider: document.getElementById('font-position-slider'),
   fontPositionVal: document.getElementById('font-position-val'),
@@ -353,6 +360,28 @@ el.fontBgColorPicker.addEventListener('input', (e) => {
   updateVideoOverlay();
 });
 
+function setBgOpacity(val) {
+  const num = Math.max(0, Math.min(100, Number(val)));
+  state.style.bgOpacity = num;
+  if (el.fontBgOpacitySlider) el.fontBgOpacitySlider.value = num;
+  if (el.fontBgOpacityVal) el.fontBgOpacityVal.textContent = `${num}%`;
+
+  if (el.opacityPreset0) el.opacityPreset0.classList.toggle('is-active', num === 0);
+  if (el.opacityPreset50) el.opacityPreset50.classList.toggle('is-active', num === 50);
+  if (el.opacityPreset78) el.opacityPreset78.classList.toggle('is-active', num === 78);
+  if (el.opacityPreset100) el.opacityPreset100.classList.toggle('is-active', num === 100);
+
+  updateVideoOverlay();
+}
+
+if (el.fontBgOpacitySlider) {
+  el.fontBgOpacitySlider.addEventListener('input', (e) => setBgOpacity(e.target.value));
+}
+if (el.opacityPreset0) el.opacityPreset0.addEventListener('click', () => setBgOpacity(0));
+if (el.opacityPreset50) el.opacityPreset50.addEventListener('click', () => setBgOpacity(50));
+if (el.opacityPreset78) el.opacityPreset78.addEventListener('click', () => setBgOpacity(78));
+if (el.opacityPreset100) el.opacityPreset100.addEventListener('click', () => setBgOpacity(100));
+
 el.fontSizeSelect.addEventListener('change', (e) => {
   state.style.fontSizeOption = e.target.value;
   updateVideoOverlay();
@@ -431,22 +460,25 @@ function updateVideoOverlay() {
       ? 'none'
       : `1px 1px 3px ${strokeCol}, -1px -1px 3px ${strokeCol}, 1px -1px 3px ${strokeCol}, -1px 1px 3px ${strokeCol}`;
 
-    // Background Shape / Box
-    if (state.style.bgStyle === 'none') {
+    // Background Shape / Box Opacity
+    const opacityRatio = Math.max(0, Math.min(100, Number(state.style.bgOpacity !== undefined ? state.style.bgOpacity : 78))) / 100;
+
+    if (state.style.bgStyle === 'none' || opacityRatio === 0) {
       el.captionOverlayText.style.background = 'transparent';
       el.captionOverlayText.style.boxShadow = 'none';
-    } else if (state.style.bgStyle === 'solid-black') {
-      el.captionOverlayText.style.background = '#000000';
-      el.captionOverlayText.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.5)';
-    } else if (state.style.bgStyle === 'solid-white') {
-      el.captionOverlayText.style.background = '#ffffff';
-      el.captionOverlayText.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.3)';
-    } else if (state.style.bgStyle === 'custom') {
-      el.captionOverlayText.style.background = state.style.bgColor || '#000000';
-      el.captionOverlayText.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.4)';
     } else {
-      el.captionOverlayText.style.background = 'rgba(0, 0, 0, 0.72)';
-      el.captionOverlayText.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.4)';
+      let targetHex = state.style.bgColor || '#000000';
+      if (state.style.bgStyle === 'solid-black') targetHex = '#000000';
+      if (state.style.bgStyle === 'solid-white') targetHex = '#ffffff';
+      if (state.style.bgStyle === 'pill') targetHex = '#000000';
+
+      const clean = targetHex.replace('#', '').trim();
+      const r = parseInt(clean.slice(0, 2), 16) || 0;
+      const g = parseInt(clean.slice(2, 4), 16) || 0;
+      const b = parseInt(clean.slice(4, 6), 16) || 0;
+
+      el.captionOverlayText.style.background = `rgba(${r}, ${g}, ${b}, ${opacityRatio})`;
+      el.captionOverlayText.style.boxShadow = opacityRatio > 0 ? `0 4px 16px rgba(0, 0, 0, ${opacityRatio * 0.5})` : 'none';
     }
 
     // Position (Percentage from bottom)

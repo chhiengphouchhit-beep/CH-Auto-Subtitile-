@@ -520,6 +520,8 @@ function generateAssContent(captions, width = 1280, height = 720, styleOptions =
   let backColour = '&HFF000000';
   let outlineColour = '&HFF000000';
 
+  const bgOpacityVal = Math.max(0, Math.min(100, Number(styleOptions.bgOpacity !== undefined ? styleOptions.bgOpacity : 78))) / 100;
+
   if (bgStyle === 'pill' || bgStyle === 'solid-black' || bgStyle === 'solid-white' || bgStyle === 'custom') {
     borderStyle = 3; // Opaque Box shape in ASS
     outlinePx = Math.max(8, Math.round(fontSize * 0.16)); // Box Padding in ASS BorderStyle=3
@@ -530,8 +532,7 @@ function generateAssContent(captions, width = 1280, height = 720, styleOptions =
     if (bgStyle === 'solid-white') targetBg = '#ffffff';
     if (bgStyle === 'pill') targetBg = '#000000';
 
-    // Must be 1.0 opacity (&H00BBGGRR) for libass to render the background box pill
-    backColour = hexToAssColor(targetBg, 1.0);
+    backColour = hexToAssColor(targetBg, bgOpacityVal);
   } else {
     borderStyle = 1;
     shadowPx = 1;
@@ -692,15 +693,22 @@ async function generateOverlayPngs(dir, width, height, captions, styleOptions = 
   }
   const marginBottomPx = Math.round(height * (percent / 100));
 
+  const bgOpacityVal = Math.max(0, Math.min(100, Number(styleOptions.bgOpacity !== undefined ? styleOptions.bgOpacity : 78))) / 100;
+
+  let targetHex = bgColor || '#000000';
+  if (bgStyle === 'solid-black') targetHex = '#000000';
+  if (bgStyle === 'solid-white') targetHex = '#ffffff';
+  if (bgStyle === 'pill') targetHex = '#000000';
+
   let bgCss = 'background: rgba(0, 0, 0, 0.78);';
-  if (bgStyle === 'none') {
+  if (bgStyle === 'none' || bgOpacityVal === 0) {
     bgCss = 'background: transparent;';
-  } else if (bgStyle === 'solid-black') {
-    bgCss = 'background: #000000;';
-  } else if (bgStyle === 'solid-white') {
-    bgCss = 'background: #ffffff;';
-  } else if (bgStyle === 'custom' && bgColor) {
-    bgCss = `background: ${bgColor};`;
+  } else {
+    const clean = targetHex.replace('#', '').trim();
+    const r = parseInt(clean.slice(0, 2), 16) || 0;
+    const g = parseInt(clean.slice(2, 4), 16) || 0;
+    const b = parseInt(clean.slice(4, 6), 16) || 0;
+    bgCss = `background: rgba(${r}, ${g}, ${b}, ${bgOpacityVal});`;
   }
 
   let strokeCss = '';
