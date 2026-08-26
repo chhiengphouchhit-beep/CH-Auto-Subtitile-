@@ -11,11 +11,15 @@ const multer = require('multer');
 
 const execFileAsync = promisify(execFile);
 
+const os = require('os');
+
 const PORT = process.env.PORT || 1100;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.7-flash';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
-const UPLOAD_ROOT = path.join(__dirname, 'uploads');
+const UPLOAD_ROOT = process.env.RENDER || process.env.VERCEL || process.env.NODE_ENV === 'production'
+  ? path.join(os.tmpdir(), 'khmer-caption-studio-uploads')
+  : path.join(__dirname, 'uploads');
 fs.mkdirSync(UPLOAD_ROOT, { recursive: true });
 
 const app = express();
@@ -33,7 +37,9 @@ app.use('/media', express.static(UPLOAD_ROOT));
 // ---------------------------------------------------------------------------
 // Admin & Access Key Management (Only CHHIT Admin Can Approve & Limit Users)
 // ---------------------------------------------------------------------------
-const DATA_DIR = path.join(__dirname, 'data');
+const DATA_DIR = process.env.RENDER || process.env.VERCEL || process.env.NODE_ENV === 'production'
+  ? path.join(os.tmpdir(), 'khmer-caption-studio-data')
+  : path.join(__dirname, 'data');
 fs.mkdirSync(DATA_DIR, { recursive: true });
 const KEYS_FILE = path.join(DATA_DIR, 'keys.json');
 
