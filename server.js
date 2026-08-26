@@ -223,7 +223,7 @@ app.post('/api/upload', upload.single('video'), async (req, res) => {
     const previewPath = path.join(dir, 'preview.mp4');
 
     // 1. Extract audio wav for Gemini
-    await execFileAsync('ffmpeg', [
+    await execFileAsync(FFMPEG_PATH, [
       '-y', '-i', sourcePath,
       '-ac', '1', '-ar', '16000', '-vn',
       audioPath,
@@ -596,7 +596,35 @@ function timeToSeconds(val) {
   return parseFloat(str) || 0;
 }
 
-const EDGE_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
+let FFMPEG_PATH = 'ffmpeg';
+try {
+  const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
+  if (ffmpegInstaller && ffmpegInstaller.path) {
+    FFMPEG_PATH = ffmpegInstaller.path;
+  }
+} catch (e) {}
+
+let CHROMIUM_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
+try {
+  const puppeteer = require('puppeteer');
+  if (puppeteer.executablePath()) {
+    CHROMIUM_PATH = puppeteer.executablePath();
+  }
+} catch (e) {
+  const candidatePaths = [
+    'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+    'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/chromium',
+  ];
+  for (const p of candidatePaths) {
+    if (fs.existsSync(p)) {
+      CHROMIUM_PATH = p;
+      break;
+    }
+  }
+}
 
 const fontBase64Cache = {};
 
@@ -612,7 +640,7 @@ function getFontBase64(fontFileName) {
 }
 
 async function generateOverlayPngs(dir, width, height, captions, styleOptions = {}) {
-  if (!fs.existsSync(EDGE_PATH)) return null;
+  if (!CHROMIUM_PATH || !fs.existsSync(CHROMIUM_PATH)) return null;
 
   const {
     fontName = 'Noto Sans Khmer',
@@ -741,7 +769,7 @@ async function generateOverlayPngs(dir, width, height, captions, styleOptions = 
         fs.writeFileSync(htmlPath, html, 'utf8');
 
         try {
-          await execFileAsync(EDGE_PATH, [
+          await execFileAsync(CHROMIUM_PATH, [
             '--headless',
             '--disable-gpu',
             '--hide-scrollbars',
@@ -906,7 +934,7 @@ app.post('/api/export-video', async (req, res) => {
       }
     }
 
-    await execFileAsync('ffmpeg', ffmpegArgs, { cwd: dir, maxBuffer: 100 * 1024 * 1024 });
+    await execFileAsync(FFMPEG_PATH, ffmpegArgs, { cwd: dir, maxBuffer: 100 * 1024 * 1024 });
 
     const key = req.headers['x-access-key'] || req.body.accessKey;
     incrementKeyUsage(key);
