@@ -544,14 +544,16 @@ function generateAssContent(captions, width = 1280, height = 720, styleOptions =
     }
   }
 
-  let alignment = 2; // Bottom Center
+  let alignment = 5; // Middle Center
   let percent = Number(posYPercent);
   if (isNaN(percent)) {
     if (position === 'center') percent = 45;
     else if (position === 'top') percent = 78;
     else percent = 12;
   }
-  const marginV = Math.max(10, Math.round(height * (percent / 100)));
+  const posX = Math.round(width / 2);
+  const posY = Math.round(height * ((100 - percent) / 100));
+  const marginV = 0;
 
   const primaryColour = hexToAssColor(color, 1.0);
 
@@ -563,7 +565,7 @@ ScaledBorderAndShadow: yes
 
 [V4+ Styles]
 Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour, BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle, BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding
-Style: Default,${safeFontName},${fontSize},${primaryColour},&H00000000,${outlineColour},${backColour},1,0,0,0,100,100,0,0,${borderStyle},${outlinePx},${shadowPx},${alignment},20,20,${marginV},1
+Style: Default,${safeFontName},${fontSize},${primaryColour},&H00000000,${outlineColour},${backColour},1,0,0,0,100,100,0,0,${alignment},${outlinePx},${shadowPx},${alignment},0,0,0,1
 
 [Events]
 Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
@@ -580,7 +582,7 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
       const start = srtToAssTimestamp(startSec);
       const end = srtToAssTimestamp(endSec);
       const text = String(c.text || '').replace(/\r?\n/g, '\\N');
-      return `Dialogue: 0,${start},${end},Default,,0,0,0,,${text}`;
+      return `Dialogue: 0,${start},${end},Default,,0,0,0,,{\\an5\\pos(${posX},${posY})}${text}`;
     })
     .join('\n');
 
