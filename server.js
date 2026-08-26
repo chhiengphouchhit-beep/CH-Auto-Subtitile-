@@ -751,24 +751,26 @@ async function generateOverlayPngs(dir, width, height, captions, styleOptions = 
     font-family: 'EmbeddedKhmerFont';
     src: url('data:font/ttf;charset=utf-8;base64,${fontBase64}') format('truetype');
   }
-  body {
+  html, body {
     margin: 0;
     padding: 0;
     width: ${width}px;
     height: ${height}px;
+    position: relative;
+    overflow: hidden;
     background: transparent;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-    box-sizing: border-box;
   }
   .pill {
+    position: absolute;
+    left: 50%;
+    bottom: ${percent}%;
+    transform: translateX(-50%);
     ${bgCss}
     padding: ${Math.max(10, Math.round(fontSizePx * 0.28))}px ${Math.max(18, Math.round(fontSizePx * 0.6))}px;
     border-radius: ${Math.max(12, Math.round(fontSizePx * 0.4))}px;
-    margin-bottom: ${marginBottomPx}px;
     max-width: 92%;
     box-sizing: border-box;
+    text-align: center;
   }
   .text {
     font-family: 'EmbeddedKhmerFont', sans-serif;
