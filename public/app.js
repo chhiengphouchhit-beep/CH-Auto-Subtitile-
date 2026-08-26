@@ -874,6 +874,10 @@ if (el.createKeyBtn) {
       if (el.newUserName) el.newUserName.value = '';
       alert(`✨ បានបង្កើត Access Key ជោគជ័យ:\n\nKey: ${data.key}\n\n(សូមផ្ញើ Key នេះទៅកាន់ User របស់អ្នក!)`);
       fetchAndRenderAdminKeys();
+    } catch (err) {
+      alert(err.message);
+    }
+  });
 }
 
 // ---------------------------------------------------------------------------
