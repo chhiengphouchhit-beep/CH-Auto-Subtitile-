@@ -842,35 +842,43 @@ app.post('/api/export-video', async (req, res) => {
     let width = 1280;
     let height = 720;
     let duration = 0;
-    try {
-      const { stdout } = await execFileAsync('ffprobe', [
-        '-v', 'error',
-        '-select_streams', 'v:0',
-        '-show_entries', 'stream=width,height:format=duration',
-        '-of', 'csv=s=x:p=0',
-        sourcePath,
-      ]);
-      const parts = stdout.trim().split('x');
-      const w = Number(parts[0]);
-      const h = Number(parts[1]);
-      if (w && h) {
-        width = w;
-        height = h;
-      }
-    } catch (e) {
-      console.warn('ffprobe dimension check failed, using default:', e.message);
-    }
 
     try {
-      const { stdout } = await execFileAsync('ffprobe', [
+      const { stdout: wOut } = await execFileAsync('ffprobe', [
+        '-v', 'error',
+        '-select_streams', 'v:0',
+        '-show_entries', 'stream=width',
+        '-of', 'default=noprint_wrappers=1:nokey=1',
+        sourcePath,
+      ]);
+      const w = parseInt(String(wOut).trim(), 10);
+      if (w && !isNaN(w)) width = w;
+    } catch (e) {}
+
+    try {
+      const { stdout: hOut } = await execFileAsync('ffprobe', [
+        '-v', 'error',
+        '-select_streams', 'v:0',
+        '-show_entries', 'stream=height',
+        '-of', 'default=noprint_wrappers=1:nokey=1',
+        sourcePath,
+      ]);
+      const h = parseInt(String(hOut).trim(), 10);
+      if (h && !isNaN(h)) height = h;
+    } catch (e) {}
+
+    try {
+      const { stdout: dOut } = await execFileAsync('ffprobe', [
         '-v', 'error',
         '-show_entries', 'format=duration',
         '-of', 'default=noprint_wrappers=1:nokey=1',
         sourcePath,
       ]);
-      const d = parseFloat(stdout.trim());
+      const d = parseFloat(String(dOut).trim());
       if (d && !isNaN(d)) duration = d;
     } catch (e) {}
+
+    console.log(`Video Probed Dimensions: ${width}x${height}, duration: ${duration}s (greenScreen=${greenScreen})`);
 
     const fontsDirSource = path.join(__dirname, 'fonts');
     if (fs.existsSync(fontsDirSource)) {
