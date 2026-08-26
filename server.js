@@ -488,7 +488,7 @@ function hexToAssColor(hex, opacity = 1.0) {
   return `&H${alphaHex}${bb}${gg}${rr}`.toUpperCase();
 }
 
-function generateAssContent(captions, width = 1280, height = 720, styleOptions = {}) {
+function generateAssContent(captions, width = 1280, height = 720, styleOptions = {}, videoDuration = 0) {
   const {
     fontName = 'Noto Sans Khmer',
     color = '#ffe066',
@@ -567,9 +567,15 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 `;
 
   const events = captions
-    .map((c) => {
-      const start = srtToAssTimestamp(c.start);
-      const end = srtToAssTimestamp(c.end);
+    .map((c, idx) => {
+      const isLast = idx === captions.length - 1;
+      const startSec = timeToSeconds(c.start);
+      let endSec = timeToSeconds(c.end);
+      if (isLast && videoDuration > 0) {
+        endSec = Math.max(endSec, videoDuration);
+      }
+      const start = srtToAssTimestamp(startSec);
+      const end = srtToAssTimestamp(endSec);
       const text = String(c.text || '').replace(/\r?\n/g, '\\N');
       return `Dialogue: 0,${start},${end},Default,,0,0,0,,${text}`;
     })
@@ -645,7 +651,7 @@ function getFontBase64(fontFileName) {
   return '';
 }
 
-async function generateOverlayPngs(dir, width, height, captions, styleOptions = {}) {
+async function generateOverlayPngs(dir, width, height, captions, styleOptions = {}, videoDuration = 0) {
   if (!CHROMIUM_PATH || !fs.existsSync(CHROMIUM_PATH)) return null;
 
   const {
@@ -704,12 +710,21 @@ async function generateOverlayPngs(dir, width, height, captions, styleOptions = 
   }
 
   const validCaps = captions
-    .map((c, idx) => ({
-      index: idx,
-      text: String(c.text || '').trim(),
-      start: timeToSeconds(c.start),
-      end: timeToSeconds(c.end),
-    }))
+    .map((c, idx) => {
+      const isLast = idx === captions.length - 1;
+      const startSec = timeToSeconds(c.start);
+      let endSec = timeToSeconds(c.end);
+      if (isLast && videoDuration > 0) {
+        endSec = Math.max(endSec, videoDuration);
+      }
+      return {
+        index: idx,
+        text: String(c.text || '').trim(),
+        start: startSec,
+        end: endSec,
+        isLast,
+      };
+    })
     .filter((c) => c.text && c.end > c.start);
 
   if (validCaps.length === 0) return [];
@@ -821,11 +836,12 @@ app.post('/api/export-video', async (req, res) => {
 
     let width = 1280;
     let height = 720;
+    let duration = 0;
     try {
       const { stdout } = await execFileAsync('ffprobe', [
         '-v', 'error',
         '-select_streams', 'v:0',
-        '-show_entries', 'stream=width,height',
+        '-show_entries', 'stream=width,height:format=duration',
         '-of', 'csv=s=x:p=0',
         sourcePath,
       ]);
@@ -840,11 +856,22 @@ app.post('/api/export-video', async (req, res) => {
       console.warn('ffprobe dimension check failed, using default:', e.message);
     }
 
-    const assData = generateAssContent(captions, width, height, style);
+    try {
+      const { stdout } = await execFileAsync('ffprobe', [
+        '-v', 'error',
+        '-show_entries', 'format=duration',
+        '-of', 'default=noprint_wrappers=1:nokey=1',
+        sourcePath,
+      ]);
+      const d = parseFloat(stdout.trim());
+      if (d && !isNaN(d)) duration = d;
+    } catch (e) {}
+
+    const assData = generateAssContent(captions, width, height, style, duration);
     fs.writeFileSync(assPath, assData, 'utf8');
 
     // Try HTML HarfBuzz overlay engine
-    const overlayItems = await generateOverlayPngs(dir, width, height, captions, style);
+    const overlayItems = await generateOverlayPngs(dir, width, height, captions, style, duration);
 
     let ffmpegArgs = [];
 
@@ -857,7 +884,8 @@ app.post('/api/export-video', async (req, res) => {
         const isLast = idx === overlayItems.length - 1;
         const outStream = isLast ? 'outv' : `v${idx + 1}`;
         const inputIdx = idx + 1;
-        filterStr += `[${prevStream}][${inputIdx}:v]overlay=0:0:enable='between(t,${item.start},${item.end})'[${outStream}];`;
+        const enableCond = isLast ? `gte(t,${item.start})` : `between(t,${item.start},${item.end})`;
+        filterStr += `[${prevStream}][${inputIdx}:v]overlay=0:0:enable='${enableCond}'[${outStream}];`;
         prevStream = outStream;
       });
       filterStr = filterStr.slice(0, -1);
@@ -866,15 +894,14 @@ app.post('/api/export-video', async (req, res) => {
         ffmpegArgs = [
           '-y',
           '-i', sourceFile,
-          ...overlayItems.flatMap(item => ['-i', item.pngName]),
-          '-filter_complex', `color=c=0x00ff00:s=${width}x${height}[bg];${filterStr}`,
+          ...overlayItems.flatMap((item) => ['-i', item.pngName]),
+          '-filter_complex', `color=c=0x00ff00:s=${width}x${height}${duration ? `:d=${duration}` : ''}[bg];${filterStr}`,
           '-map', '[outv]',
           '-map', '0:a?',
           '-c:v', 'libx264',
           '-preset', 'slow',
           '-crf', '16',
           '-c:a', 'copy',
-          '-shortest',
           outputFilename,
         ];
       } else {
