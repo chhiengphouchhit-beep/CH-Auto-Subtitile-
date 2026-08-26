@@ -97,16 +97,23 @@ function setStatus(msg, kind) {
 // Health / model badge
 // ---------------------------------------------------------------------------
 
-fetch('/api/health')
-  .then((r) => r.json())
-  .then((info) => {
-    el.modelBadge.textContent = info.geminiConfigured
-      ? `Gemini: ${info.model}`
-      : 'mock mode (no API key)';
-  })
-  .catch(() => {
-    el.modelBadge.textContent = 'server unreachable';
-  });
+async function checkHealth() {
+  try {
+    const r = await fetch('/api/health');
+    const info = await r.json();
+    if (el.modelBadge) {
+      el.modelBadge.textContent = info.geminiConfigured
+        ? `Gemini: ${info.model}`
+        : 'mock mode (no API key)';
+    }
+  } catch (e) {
+    if (el.modelBadge) {
+      el.modelBadge.textContent = '⚡ Waking server up...';
+    }
+    setTimeout(checkHealth, 3000);
+  }
+}
+checkHealth();
 
 // ---------------------------------------------------------------------------
 // Upload
