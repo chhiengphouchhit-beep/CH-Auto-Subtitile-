@@ -928,8 +928,12 @@ app.get('/api/health', (req, res) => {
   res.json({ ok: true, geminiConfigured: Boolean(GEMINI_API_KEY), model: GEMINI_MODEL });
 });
 
-app.listen(PORT, () => {
-  console.log(`Khmer Caption Studio running at http://localhost:${PORT}`);
-  console.log(GEMINI_API_KEY ? `Using Gemini model: ${GEMINI_MODEL}` : 'No GEMINI_API_KEY set — running in mock-transcript mode.');
-});
+if (process.env.VERCEL) {
+  module.exports = app;
+} else {
+  app.listen(PORT, () => {
+    console.log(`Khmer Caption Studio running at http://localhost:${PORT}`);
+    console.log(GEMINI_API_KEY ? `Using Gemini model: ${GEMINI_MODEL}` : 'No GEMINI_API_KEY set — running in mock-transcript mode.');
+  });
+}
 
