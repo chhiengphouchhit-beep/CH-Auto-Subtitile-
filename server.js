@@ -502,8 +502,11 @@ function generateAssContent(captions, width = 1280, height = 720, styleOptions =
 
   const bgStyle = styleOptions.bgStyle || 'pill';
 
-  // Enforce Noto Sans Khmer for libass to guarantee 100% accurate subscript (ជើង) shaping on export
-  const safeFontName = 'Noto Sans Khmer';
+  const fnClean = String(fontName || '').toLowerCase().replace(/\s+/g, '');
+  let safeFontName = 'Kantumruy Pro';
+  if (fnClean.includes('santepheap') || fnClean.includes('koh')) safeFontName = 'Koh Santepheap';
+  else if (fnClean.includes('noto')) safeFontName = 'Noto Sans Khmer';
+  else safeFontName = 'Kantumruy Pro';
 
   let sizeMultiplier = 0.048;
   if (fontSizeOption === 'small') sizeMultiplier = 0.036;
@@ -866,6 +869,24 @@ app.post('/api/export-video', async (req, res) => {
       const d = parseFloat(stdout.trim());
       if (d && !isNaN(d)) duration = d;
     } catch (e) {}
+
+    const fontsDirSource = path.join(__dirname, 'fonts');
+    if (fs.existsSync(fontsDirSource)) {
+      const fontFiles = fs.readdirSync(fontsDirSource);
+      for (const fontFile of fontFiles) {
+        if (fontFile.endsWith('.ttf') || fontFile.endsWith('.otf')) {
+          const srcPath = path.join(fontsDirSource, fontFile);
+          const destPath = path.join(dir, fontFile);
+          if (!fs.existsSync(destPath)) {
+            try {
+              fs.copyFileSync(srcPath, destPath);
+            } catch (e) {
+              console.warn('Could not copy font file:', fontFile, e.message);
+            }
+          }
+        }
+      }
+    }
 
     const assData = generateAssContent(captions, width, height, style, duration);
     fs.writeFileSync(assPath, assData, 'utf8');
