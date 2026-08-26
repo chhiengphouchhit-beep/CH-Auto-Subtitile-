@@ -1,10 +1,9 @@
 services:
   - type: web
     name: ch-auto-subtitle
-    env: node
+    env: docker
+    dockerfilePath: ./Dockerfile
     plan: free
-    buildCommand: npm install
-    startCommand: node server.js
     envVars:
       - key: PORT
         value: 1100
