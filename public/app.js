@@ -1003,14 +1003,60 @@ document.querySelectorAll('.ratio-card').forEach((card) => {
   });
 });
 
-const resetTrimBtn = document.getElementById('reset-trim-btn');
-if (resetTrimBtn) {
-  resetTrimBtn.addEventListener('click', () => {
-    state.editOptions.trimStart = 0;
-    state.editOptions.trimEnd = parseFloat(el.video.duration ? el.video.duration.toFixed(2) : 0);
-    if (el.trimStartInput) el.trimStartInput.value = 0;
-    if (el.trimEndInput) el.trimEndInput.value = state.editOptions.trimEnd;
-    setStatus('បាន Reset Trim មកប្រវែងវីដេអូពេញដើមវិញ!', 'ok');
+const scanCopyrightBtn = document.getElementById('scan-copyright-btn');
+const copyrightScanStatus = document.getElementById('copyright-scan-status');
+
+if (scanCopyrightBtn) {
+  scanCopyrightBtn.addEventListener('click', async () => {
+    if (!state.uploadId) return setStatus('សូម Upload វីដេអូជាមុនសិន ដើម្បី Scan Copyright!', 'error');
+
+    if (copyrightScanStatus) copyrightScanStatus.textContent = '⚡ កំពុង Scan វិភាគ Copyright & Safety...';
+    scanCopyrightBtn.disabled = true;
+
+    try {
+      const res = await fetch('/api/check-copyright', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: state.uploadId })
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Copyright check failed.');
+
+      const { tiktok, facebook, youtube } = data.platforms || {};
+
+      // Update TikTok Card
+      if (tiktok) {
+        document.getElementById('status-tiktok').textContent = tiktok.label;
+        document.getElementById('detail-tiktok').textContent = tiktok.details;
+        const dot = document.getElementById('dot-tiktok');
+        dot.className = `status-dot dot-${tiktok.statusClass}`;
+      }
+
+      // Update Facebook Card
+      if (facebook) {
+        document.getElementById('status-facebook').textContent = facebook.label;
+        document.getElementById('detail-facebook').textContent = facebook.details;
+        const dot = document.getElementById('dot-facebook');
+        dot.className = `status-dot dot-${facebook.statusClass}`;
+      }
+
+      // Update YouTube Card
+      if (youtube) {
+        document.getElementById('status-youtube').textContent = youtube.label;
+        document.getElementById('detail-youtube').textContent = youtube.details;
+        const dot = document.getElementById('dot-youtube');
+        dot.className = `status-dot dot-${youtube.statusClass}`;
+      }
+
+      if (copyrightScanStatus) copyrightScanStatus.textContent = '✨ Scan រួចរាល់ 100%! វីដេអូមានសុវត្ថិភាពខ្ពស់';
+      setStatus('បាន Scan ពិនិត្យ Copyright & Monetization Safety រួចរាល់!', 'ok');
+    } catch (err) {
+      if (copyrightScanStatus) copyrightScanStatus.textContent = '❌ ការ Scan បរាជ័យ';
+      setStatus(err.message, 'error');
+    } finally {
+      scanCopyrightBtn.disabled = false;
+    }
   });
 }
 

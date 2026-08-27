@@ -1410,6 +1410,158 @@ textarea:focus, input:focus{ outline: 2px solid var(--accent); outline-offset: 1
   font-size: 0.78rem !important;
 }
 
+/* Copyright & Monetization Checker Styling */
+.copyright-panel {
+  border: 1px solid rgba(16, 185, 129, 0.3) !important;
+  background: linear-gradient(180deg, rgba(13, 27, 24, 0.95), rgba(15, 23, 42, 0.95)) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.copyright-badge {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: #ffffff !important;
+  font-size: 0.68rem !important;
+  padding: 2px 8px !important;
+  border-radius: 8px !important;
+  margin-left: auto;
+}
+
+.copyright-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.copyright-scan-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-scan-copyright {
+  background: linear-gradient(135deg, #10b981, #059669) !important;
+  color: #ffffff !important;
+  border: none !important;
+  font-weight: 700 !important;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.35) !important;
+  padding: 8px 16px !important;
+  border-radius: 10px !important;
+  cursor: pointer;
+  transition: all 0.2s ease !important;
+}
+
+.btn-scan-copyright:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 18px rgba(16, 185, 129, 0.5) !important;
+}
+
+.copyright-scan-status {
+  font-size: 0.8rem;
+  color: #34d399;
+  font-weight: 600;
+}
+
+.platform-badges-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.platform-card {
+  background: rgba(13, 17, 23, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  transition: border-color 0.3s ease;
+}
+
+.platform-icon-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.platform-icon {
+  font-size: 1.1rem;
+}
+
+.platform-name {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #f0f6fc;
+}
+
+.status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-left: auto;
+  transition: all 0.3s ease;
+}
+
+.dot-gray {
+  background: #6e7681;
+  box-shadow: none;
+}
+
+.dot-green {
+  background: #10b981;
+  box-shadow: 0 0 10px #10b981;
+}
+
+.dot-yellow {
+  background: #f59e0b;
+  box-shadow: 0 0 10px #f59e0b;
+}
+
+.dot-red {
+  background: #ef4444;
+  box-shadow: 0 0 10px #ef4444;
+}
+
+.platform-status-text {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #8b949e;
+}
+
+.platform-detail-text {
+  font-size: 0.7rem;
+  color: #8b949e;
+  line-height: 1.35;
+}
+
+.copyright-fix-box {
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.fix-box-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #34d399;
+}
+
+.fix-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.76rem;
+  color: #c9d1d9;
+  cursor: pointer;
+}
+
 @media (max-width: 767px) {
   .admin-table-container {
     max-height: 220px;
