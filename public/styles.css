@@ -86,23 +86,20 @@ button, input, textarea, select{ font-family: inherit; }
   border-radius: 20px;
 }
 
-/* ---- layout ---- */
 .layout{
   flex: 1;
-  display: grid;
-  grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.9fr);
-  gap: 20px;
-  padding: 20px;
-  max-width: 1400px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 24px 16px;
+  max-width: 960px;
   width: 100%;
   margin: 0 auto;
-}
-@media (max-width: 860px){
-  .layout{ grid-template-columns: 1fr; padding: 12px; }
+  align-items: center;
 }
 
 /* ---- preview pane ---- */
-.preview-pane{ display:flex; flex-direction:column; gap: 20px; min-width: 0; }
+.preview-pane{ display:flex; flex-direction:column; gap: 20px; width: 100%; }
 
 .video-shell{
   position: relative;
@@ -266,12 +263,15 @@ textarea:focus, input:focus{ border-color: #8b5cf6; outline: none; box-shadow: 0
 
 /* ---- timeline pane ---- */
 .timeline-pane{
-  background: var(--surface);
+  background: rgba(17, 22, 34, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: 16px;
   display:flex; flex-direction:column;
-  min-height: 300px;
-  max-height: calc(100vh - 110px);
+  width: 100%;
+  padding: 16px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
 }
 .timeline-head{
   display:flex; align-items:center; justify-content:space-between;
@@ -1262,9 +1262,11 @@ textarea:focus, input:focus{ border-color: #8b5cf6; outline: none; box-shadow: 0
 
 /* CapCut Studio Mode Navigation Tabs */
 .studio-nav-wrapper {
-  max-width: 1400px;
-  margin: 12px auto 0;
+  max-width: 960px;
+  margin: 16px auto 0;
   padding: 0 16px;
+  display: flex;
+  justify-content: center;
 }
 
 .studio-nav-tabs {
