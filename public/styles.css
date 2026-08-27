@@ -1203,6 +1203,96 @@ textarea:focus, input:focus{ outline: 2px solid var(--accent); outline-offset: 1
   transition: opacity 0.3s ease;
 }
 
+/* CapCut Video Editing Suite Styling */
+.capcut-panel {
+  border: 1px solid rgba(99, 102, 241, 0.25) !important;
+  background: linear-gradient(180deg, rgba(22, 27, 34, 0.95), rgba(15, 23, 42, 0.95)) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.capcut-badge {
+  background: linear-gradient(135deg, #ec4899, #8b5cf6) !important;
+  color: #ffffff !important;
+  font-size: 0.68rem !important;
+  padding: 2px 8px !important;
+  border-radius: 8px !important;
+  margin-left: auto;
+}
+
+.capcut-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.trimmer-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.trim-field {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.trim-label {
+  font-size: 0.78rem;
+  color: #8b949e;
+  font-weight: 600;
+}
+
+.trim-input {
+  width: 74px;
+  background: rgba(13, 17, 23, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  padding: 4px 8px;
+  color: #f0f6fc;
+  font-size: 0.82rem;
+  outline: none;
+}
+
+.bgm-row, .logo-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+
+.bgm-upload-btn, .logo-upload-btn {
+  background: rgba(99, 102, 241, 0.15) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  color: #a78bfa !important;
+  padding: 5px 12px !important;
+  border-radius: 8px !important;
+  cursor: pointer;
+}
+
+.bgm-file-tag {
+  font-size: 0.76rem;
+  color: #8b949e;
+  max-width: 140px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bgm-slider {
+  flex: 1;
+  min-width: 120px;
+}
+
+.logo-pos-select {
+  width: 130px !important;
+  padding: 4px 8px !important;
+  font-size: 0.78rem !important;
+}
+
 @media (max-width: 767px) {
   .admin-table-container {
     max-height: 220px;

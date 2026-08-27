@@ -15,6 +15,15 @@ const state = {
     position: 'bottom',
     posYPercent: 12,
   },
+  editOptions: {
+    aspectRatio: 'original',
+    trimStart: 0,
+    trimEnd: 0,
+    bgmFilename: null,
+    bgmVolume: 15,
+    logoFilename: null,
+    logoPos: 'top-right'
+  }
 };
 
 function cleanKhmerSpaces(text) {
@@ -75,6 +84,18 @@ const el = {
   seekFwdBtn: document.getElementById('seek-fwd-btn'),
   addCaptionBtn: document.getElementById('add-caption-btn'),
   captionSearchInput: document.getElementById('caption-search-input'),
+  aspectRatioSelect: document.getElementById('aspect-ratio-select'),
+  trimStartInput: document.getElementById('trim-start-input'),
+  trimEndInput: document.getElementById('trim-end-input'),
+  setTrimStartBtn: document.getElementById('set-trim-start-btn'),
+  setTrimEndBtn: document.getElementById('set-trim-end-btn'),
+  bgmFileInput: document.getElementById('bgm-file-input'),
+  bgmFilename: document.getElementById('bgm-filename'),
+  bgmVolSlider: document.getElementById('bgm-vol-slider'),
+  bgmVolVal: document.getElementById('bgm-vol-val'),
+  logoFileInput: document.getElementById('logo-file-input'),
+  logoFilename: document.getElementById('logo-filename'),
+  logoPosSelect: document.getElementById('logo-pos-select'),
   exportModal: document.getElementById('export-modal'),
   exportModalTitle: document.getElementById('export-modal-title'),
   exportModalSub: document.getElementById('export-modal-sub'),
@@ -944,6 +965,107 @@ function stopExportAnimation() {
   if (el.exportModal) el.exportModal.hidden = true;
 }
 
+// ---------------------------------------------------------------------------
+// CapCut Video Editing Event Listeners
+// ---------------------------------------------------------------------------
+
+if (el.aspectRatioSelect) {
+  el.aspectRatioSelect.addEventListener('change', (e) => {
+    state.editOptions.aspectRatio = e.target.value;
+    setStatus(`បានប្តូរ Aspect Ratio ទៅ ${e.target.value}`, 'ok');
+  });
+}
+
+if (el.setTrimStartBtn) {
+  el.setTrimStartBtn.addEventListener('click', () => {
+    const t = parseFloat(el.video.currentTime.toFixed(2));
+    state.editOptions.trimStart = t;
+    if (el.trimStartInput) el.trimStartInput.value = t;
+    setStatus(`បានកំណត់ Trim Start នៅ ${t}s`, 'ok');
+  });
+}
+
+if (el.setTrimEndBtn) {
+  el.setTrimEndBtn.addEventListener('click', () => {
+    const t = parseFloat(el.video.currentTime.toFixed(2));
+    state.editOptions.trimEnd = t;
+    if (el.trimEndInput) el.trimEndInput.value = t;
+    setStatus(`បានកំណត់ Trim End នៅ ${t}s`, 'ok');
+  });
+}
+
+if (el.trimStartInput) {
+  el.trimStartInput.addEventListener('change', (e) => {
+    state.editOptions.trimStart = parseFloat(e.target.value) || 0;
+  });
+}
+
+if (el.trimEndInput) {
+  el.trimEndInput.addEventListener('change', (e) => {
+    state.editOptions.trimEnd = parseFloat(e.target.value) || 0;
+  });
+}
+
+if (el.bgmVolSlider) {
+  el.bgmVolSlider.addEventListener('input', (e) => {
+    const val = parseInt(e.target.value, 10);
+    state.editOptions.bgmVolume = val;
+    if (el.bgmVolVal) el.bgmVolVal.textContent = `${val}% Volume`;
+  });
+}
+
+if (el.bgmFileInput) {
+  el.bgmFileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (el.bgmFilename) el.bgmFilename.textContent = 'កំពុង Upload BGM...';
+    const form = new FormData();
+    form.append('media', file);
+
+    try {
+      const res = await fetch('/api/upload-media', { method: 'POST', body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'BGM upload failed.');
+      state.editOptions.bgmFilename = data.file.filename;
+      if (el.bgmFilename) el.bgmFilename.textContent = `🎵 ${file.name}`;
+      setStatus('បានផ្ទុកឡើង BGM ជោគជ័យ!', 'ok');
+    } catch (err) {
+      if (el.bgmFilename) el.bgmFilename.textContent = 'គ្មានចម្រៀង';
+      setStatus(err.message, 'error');
+    }
+  });
+}
+
+if (el.logoFileInput) {
+  el.logoFileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    if (el.logoFilename) el.logoFilename.textContent = 'កំពុង Upload Logo...';
+    const form = new FormData();
+    form.append('media', file);
+
+    try {
+      const res = await fetch('/api/upload-media', { method: 'POST', body: form });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Logo upload failed.');
+      state.editOptions.logoFilename = data.file.filename;
+      if (el.logoFilename) el.logoFilename.textContent = `🖼️ ${file.name}`;
+      setStatus('បានផ្ទុកឡើង Watermark Logo ជោគជ័យ!', 'ok');
+    } catch (err) {
+      if (el.logoFilename) el.logoFilename.textContent = 'គ្មាន Logo';
+      setStatus(err.message, 'error');
+    }
+  });
+}
+
+if (el.logoPosSelect) {
+  el.logoPosSelect.addEventListener('change', (e) => {
+    state.editOptions.logoPos = e.target.value;
+  });
+}
+
 // Option 2: Export Video with Burned-In Captions (.MP4)
 el.exportVideoBtn.addEventListener('click', async () => {
   el.exportDropdown.classList.remove('is-open');
@@ -957,7 +1079,14 @@ el.exportVideoBtn.addEventListener('click', async () => {
     const res = await fetch('/api/export-video', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Access-Key': getAccessKey() },
-      body: JSON.stringify({ id: state.uploadId, captions: state.captions, greenScreen: false, style: state.style, accessKey: getAccessKey() }),
+      body: JSON.stringify({
+        id: state.uploadId,
+        captions: state.captions,
+        greenScreen: false,
+        style: state.style,
+        editOptions: state.editOptions,
+        accessKey: getAccessKey()
+      }),
     });
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));
@@ -993,7 +1122,14 @@ el.exportGreenscreenBtn.addEventListener('click', async () => {
     const res = await fetch('/api/export-video', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Access-Key': getAccessKey() },
-      body: JSON.stringify({ id: state.uploadId, captions: state.captions, greenScreen: true, style: state.style, accessKey: getAccessKey() }),
+      body: JSON.stringify({
+        id: state.uploadId,
+        captions: state.captions,
+        greenScreen: true,
+        style: state.style,
+        editOptions: state.editOptions,
+        accessKey: getAccessKey()
+      }),
     });
     if (!res.ok) {
       const errData = await res.json().catch(() => ({}));

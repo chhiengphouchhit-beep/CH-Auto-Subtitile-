@@ -118,6 +118,78 @@
         </div>
       </div>
 
+      <!-- CapCut Video Editing Suite Panel -->
+      <div class="panel capcut-panel">
+        <div class="panel-label">
+          <span>🎬 CapCut Video Editor (កាត់តវីដេអូ & បន្ថែមតន្ត្រី)</span>
+          <span class="cute-font-badge capcut-badge">PRO TOOLS</span>
+        </div>
+
+        <div class="capcut-grid">
+          <!-- Aspect Ratio Switcher -->
+          <div class="style-group">
+            <label class="style-label" for="aspect-ratio-select">📐 Video Aspect Ratio (ទំហំវីដេអូ)</label>
+            <select id="aspect-ratio-select" class="style-select">
+              <option value="original" selected>📼 Original Ratio (ទំហំដើមវីដេអូ)</option>
+              <option value="9:16">📱 9:16 Vertical (TikTok / Reels / Shorts)</option>
+              <option value="16:9">💻 16:9 Landscape (YouTube)</option>
+              <option value="1:1">🔲 1:1 Square (Instagram / Facebook)</option>
+            </select>
+          </div>
+
+          <!-- Video Trimmer -->
+          <div class="style-group style-group-full">
+            <label class="style-label">✂️ Video Trim & Cut (កាត់តប្រវែងវីដេអូ)</label>
+            <div class="trimmer-row">
+              <div class="trim-field">
+                <span class="trim-label">Trim Start:</span>
+                <input type="number" id="trim-start-input" min="0" step="0.1" value="0" class="trim-input" />
+                <button type="button" id="set-trim-start-btn" class="btn btn-ghost btn-xs" title="កំណត់ពេលចាប់ផ្តើមកាត់តាមវីដេអូបច្ចុប្បន្ន">⏱️ Set Start</button>
+              </div>
+              <div class="trim-field">
+                <span class="trim-label">Trim End:</span>
+                <input type="number" id="trim-end-input" min="0" step="0.1" value="0" class="trim-input" placeholder="End" />
+                <button type="button" id="set-trim-end-btn" class="btn btn-ghost btn-xs" title="កំណត់ពេលបញ្ចប់កាត់តាមវីដេអូបច្ចុប្បន្ន">⏱️ Set End</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Background Music Overlay -->
+          <div class="style-group style-group-full">
+            <div class="style-label-row">
+              <label class="style-label">🎵 Background Music Mixer (តន្ត្រីអមខាងក្រោយ)</label>
+              <span id="bgm-vol-val" class="style-val-badge">15% Volume</span>
+            </div>
+            <div class="bgm-row">
+              <label class="btn btn-ghost btn-xs bgm-upload-btn">
+                📂 ជ្រើសរើសចម្រៀង (.mp3)
+                <input type="file" id="bgm-file-input" accept="audio/*" hidden />
+              </label>
+              <span id="bgm-filename" class="bgm-file-tag">គ្មានចម្រៀង</span>
+              <input type="range" id="bgm-vol-slider" min="0" max="100" value="15" step="1" class="style-slider bgm-slider" />
+            </div>
+          </div>
+
+          <!-- Watermark Logo Overlay -->
+          <div class="style-group style-group-full">
+            <label class="style-label">🖼️ Watermark Logo Overlay (បន្ថែម Logo លើវីដេអូ)</label>
+            <div class="logo-row">
+              <label class="btn btn-ghost btn-xs logo-upload-btn">
+                🖼️ ជ្រើសរើស Logo (.png)
+                <input type="file" id="logo-file-input" accept="image/*" hidden />
+              </label>
+              <span id="logo-filename" class="bgm-file-tag">គ្មាន Logo</span>
+              <select id="logo-pos-select" class="style-select logo-pos-select">
+                <option value="top-right" selected>↗️ Top Right</option>
+                <option value="top-left">↖️ Top Left</option>
+                <option value="bottom-right">↘️ Bottom Right</option>
+                <option value="bottom-left">↙️ Bottom Left</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="panel">
         <div class="panel-label">
           <span>Caption Style (កំណត់ស្ទីលអក្សរ)</span>

@@ -841,7 +841,7 @@ async function generateOverlayPngs(dir, width, height, captions, styleOptions = 
 
 app.post('/api/export-video', async (req, res) => {
   try {
-    const { id, captions = [], greenScreen = false, style = {} } = req.body || {};
+    const { id, captions = [], greenScreen = false, style = {}, editOptions = {} } = req.body || {};
     if (!id) return res.status(400).json({ error: 'Missing upload id.' });
 
     const dir = path.join(UPLOAD_ROOT, id);
@@ -895,7 +895,18 @@ app.post('/api/export-video', async (req, res) => {
       if (d && !isNaN(d)) duration = d;
     } catch (e) {}
 
-    console.log(`Video Probed Dimensions: ${width}x${height}, duration: ${duration}s (greenScreen=${greenScreen})`);
+    if (editOptions.aspectRatio === '9:16') {
+      width = 1080;
+      height = 1920;
+    } else if (editOptions.aspectRatio === '16:9') {
+      width = 1920;
+      height = 1080;
+    } else if (editOptions.aspectRatio === '1:1') {
+      width = 1080;
+      height = 1080;
+    }
+
+    console.log(`Video Probed Dimensions: ${width}x${height}, duration: ${duration}s (greenScreen=${greenScreen}, ratio=${editOptions.aspectRatio || 'original'})`);
 
     const fontsDirSource = path.join(__dirname, 'fonts');
     if (fs.existsSync(fontsDirSource)) {
