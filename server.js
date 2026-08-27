@@ -22,6 +22,27 @@ const UPLOAD_ROOT = process.env.RENDER || process.env.VERCEL || process.env.NODE
   : path.join(__dirname, 'uploads');
 fs.mkdirSync(UPLOAD_ROOT, { recursive: true });
 
+function cleanOldUploads() {
+  try {
+    if (!fs.existsSync(UPLOAD_ROOT)) return;
+    const now = Date.now();
+    const dirs = fs.readdirSync(UPLOAD_ROOT);
+    dirs.forEach((dirName) => {
+      const dirPath = path.join(UPLOAD_ROOT, dirName);
+      const stat = fs.statSync(dirPath);
+      if (stat.isDirectory()) {
+        const ageHours = (now - stat.mtimeMs) / (1000 * 60 * 60);
+        if (ageHours > 6) {
+          fs.rmSync(dirPath, { recursive: true, force: true });
+        }
+      }
+    });
+  } catch (e) {}
+}
+
+cleanOldUploads();
+setInterval(cleanOldUploads, 1000 * 60 * 60);
+
 const app = express();
 app.use((req, res, next) => {
   res.setHeader(
