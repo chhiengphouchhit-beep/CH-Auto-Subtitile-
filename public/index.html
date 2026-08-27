@@ -139,6 +139,26 @@
         </div>
       </div>
 
+      <aside class="timeline-pane">
+        <div class="timeline-head">
+          <div class="timeline-title-row">
+            <span>Timeline Captions</span>
+            <span id="caption-count" class="count">0</span>
+          </div>
+          <button type="button" id="add-caption-btn" class="btn btn-ghost btn-xs btn-add-cap" title="បន្ថែមជួរ Caption ថ្មីនៅវិនាទីបច្ចុប្បន្ន">
+            ➕ បន្ថែម Caption
+          </button>
+        </div>
+        <div class="timeline-search-box">
+          <input type="text" id="caption-search-input" placeholder="🔍 ស្វែងរកពាក្យក្នុង Caption..." class="timeline-search-field" />
+        </div>
+        <div id="captions-list" class="captions-list">
+          <p class="empty-hint">Caption នឹងបង្ហាញនៅទីនេះ បន្ទាប់ពី Generate។</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="workspace-pane">
       <!-- CapCut Video Editing Suite Panel -->
       <div class="panel capcut-panel" id="capcut-studio-panel">
         <div class="panel-label">
@@ -296,7 +316,7 @@
         </div>
       </div>
 
-      <div class="panel">
+      <div class="panel" id="style-panel">
         <div class="panel-label">
           <span>Caption Style (កំណត់ស្ទីលអក្សរ)</span>
           <span id="auto-save-tag" class="auto-save-tag" title="រក្សាទុកការកែប្រែស្វ័យប្រវត្តិ">💾 Auto-Saved</span>
@@ -327,8 +347,6 @@
               <span id="font-color-label" class="color-hex-label">#FFE066</span>
             </div>
           </div>
-
-
 
           <div class="style-group">
             <label class="style-label" for="font-bg-style-select">Background Shape</label>
@@ -408,7 +426,6 @@
             ✂️ បំបែកល្បះខ្លីៗ (Viral Phrases)
           </button>
         </div>
-        </div>
 
         <div class="panel-label">Audio & Subtitle Mode (ជ្រើសរើសភាសានិយាយ និង Caption)</div>
         <select id="language-select" class="style-select lang-select-main">
@@ -431,23 +448,11 @@
       </div>
     </section>
 
-    <aside class="timeline-pane">
-      <div class="timeline-head">
-        <div class="timeline-title-row">
-          <span>Timeline Captions</span>
-          <span id="caption-count" class="count">0</span>
-        </div>
-        <button type="button" id="add-caption-btn" class="btn btn-ghost btn-xs btn-add-cap" title="បន្ថែមជួរ Caption ថ្មីនៅវិនាទីបច្ចុប្បន្ន">
-          ➕ បន្ថែម Caption
-        </button>
-      </div>
-      <div class="timeline-search-box">
-        <input type="text" id="caption-search-input" placeholder="🔍 ស្វែងរកពាក្យក្នុង Caption..." class="timeline-search-field" />
-      </div>
-      <div id="captions-list" class="captions-list">
-        <p class="empty-hint">Caption នឹងបង្ហាញនៅទីនេះ បន្ទាប់ពី Generate។</p>
-      </div>
-    </aside>
+    <!-- RIGHT SIDE: Active Workspace Panel (CapCut Editor, Copyright Checker, Style Settings) -->
+    <section class="workspace-pane">
+      <!-- CapCut Video Editing Suite Panel -->
+      <!-- Rendered above -->
+    </section>
   </main>
 
   <!-- Cute Export Progress Modal -->
