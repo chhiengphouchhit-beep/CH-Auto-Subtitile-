@@ -1,14 +1,21 @@
 @echo off
 title Setup Khmer Caption Studio on New PC
 cd /d "%~dp0"
+
 echo ==================================================
 echo 🚀 Setting up Khmer Caption Studio on New PC...
 echo ==================================================
 
 where node >nul 2>nul
 if %errorlevel% neq 0 (
+    if exist "C:\Program Files\nodejs\node.exe" set "PATH=C:\Program Files\nodejs\;%PATH%"
+    if exist "C:\Program Files (x86)\nodejs\node.exe" set "PATH=C:\Program Files (x86)\nodejs\;%PATH%"
+)
+
+where node >nul 2>nul
+if %errorlevel% neq 0 (
     echo ⚡ Node.js not detected! Auto-downloading official Node.js installer...
-    powershell -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object System.Net.WebClient).DownloadFile('https://nodejs.org/dist/v20.17.0/node-v20.17.0-x64.msi', 'node_setup.msi')"
+    powershell -ExecutionPolicy Bypass -Command "[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12; (New-Object System.Net.WebClient).DownloadFile('https://nodejs.org/dist/v20.17.0/node-v20.17.0-x64.msi', 'node_setup.msi')"
     
     echo 📦 Installing Node.js automatically in background (Please wait ~15 seconds)...
     start /wait msiexec /i node_setup.msi /qn /norestart
@@ -24,7 +31,7 @@ if %errorlevel% neq 0 (
     set "PATH=C:\Program Files\nodejs\;%PATH%"
 )
 
-if not exist "node_modules" (
+if not exist "node_modules\express" (
     echo 📦 Installing app dependencies...
     call npm install
 )
