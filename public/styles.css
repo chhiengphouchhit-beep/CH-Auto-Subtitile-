@@ -89,16 +89,16 @@ button, input, textarea, select{ font-family: inherit; }
 .layout{
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(320px, 1fr);
-  height: calc(100vh - 105px);
+  grid-template-columns: minmax(0, 1.15fr) minmax(340px, 1fr);
+  height: calc(100vh - 110px);
   overflow: hidden;
-  padding: 10px 20px 16px;
+  padding: 12px 24px;
   max-width: 1600px;
   width: 100%;
   margin: 0 auto;
-  gap: 16px;
+  gap: 20px;
 }
-@media (max-width: 900px){
+@media (max-width: 960px){
   html, body{ height: auto; overflow: auto; }
   .layout{ grid-template-columns: 1fr; height: auto; overflow: visible; padding: 12px; }
 }
@@ -112,13 +112,16 @@ button, input, textarea, select{ font-family: inherit; }
 .video-shell{
   position: relative;
   background: #06090e;
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 16px;
   overflow: hidden;
+  width: 100%;
+  min-height: 320px;
   aspect-ratio: 16 / 9;
   display:flex; align-items:center; justify-content:center;
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .video-shell:hover {
