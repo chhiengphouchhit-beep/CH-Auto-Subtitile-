@@ -11,7 +11,7 @@ const state = {
     bgStyle: 'pill',
     bgColor: '#000000',
     bgOpacity: 78,
-    fontSizeOption: 'medium',
+    customFontSizePx: 48,
     position: 'bottom',
     posYPercent: 12,
   },
@@ -509,10 +509,43 @@ if (el.opacityPreset50) el.opacityPreset50.addEventListener('click', () => setBg
 if (el.opacityPreset78) el.opacityPreset78.addEventListener('click', () => setBgOpacity(78));
 if (el.opacityPreset100) el.opacityPreset100.addEventListener('click', () => setBgOpacity(100));
 
-el.fontSizeSelect.addEventListener('change', (e) => {
-  state.style.fontSizeOption = e.target.value;
+function setCustomFontSize(val) {
+  const num = Math.max(16, Math.min(120, Number(val) || 48));
+  state.style.customFontSizePx = num;
+
+  const slider = document.getElementById('font-size-slider');
+  const valBadge = document.getElementById('font-size-val');
+  if (slider) slider.value = num;
+  if (valBadge) valBadge.textContent = `${num}px`;
+
+  const btn32 = document.getElementById('size-preset-32');
+  const btn48 = document.getElementById('size-preset-48');
+  const btn64 = document.getElementById('size-preset-64');
+  const btn84 = document.getElementById('size-preset-84');
+
+  if (btn32) btn32.classList.toggle('is-active', num === 32);
+  if (btn48) btn48.classList.toggle('is-active', num === 48);
+  if (btn64) btn64.classList.toggle('is-active', num === 64);
+  if (btn84) btn84.classList.toggle('is-active', num === 84);
+
   updateVideoOverlay();
-});
+  saveLocalBackup();
+}
+
+const fontSizeSliderEl = document.getElementById('font-size-slider');
+if (fontSizeSliderEl) {
+  fontSizeSliderEl.addEventListener('input', (e) => setCustomFontSize(e.target.value));
+}
+
+const sizePreset32 = document.getElementById('size-preset-32');
+const sizePreset48 = document.getElementById('size-preset-48');
+const sizePreset64 = document.getElementById('size-preset-64');
+const sizePreset84 = document.getElementById('size-preset-84');
+
+if (sizePreset32) sizePreset32.addEventListener('click', () => setCustomFontSize(32));
+if (sizePreset48) sizePreset48.addEventListener('click', () => setCustomFontSize(48));
+if (sizePreset64) sizePreset64.addEventListener('click', () => setCustomFontSize(64));
+if (sizePreset84) sizePreset84.addEventListener('click', () => setCustomFontSize(84));
 
 function setPosPercent(val) {
   state.style.posYPercent = Number(val);
@@ -648,12 +681,10 @@ function updateVideoOverlay() {
     el.captionOverlayText.style.fontFamily = `"${state.style.fontName}", sans-serif`;
     el.captionOverlayText.style.color = state.style.color;
 
-    // Font size
-    let fontSizeRem = '1.25rem';
-    if (state.style.fontSizeOption === 'small') fontSizeRem = '1.0rem';
-    if (state.style.fontSizeOption === 'large') fontSizeRem = '1.55rem';
-    if (state.style.fontSizeOption === 'xlarge') fontSizeRem = '1.85rem';
-    el.captionOverlayText.style.fontSize = fontSizeRem;
+    // Font size custom pixel scaling
+    const sizePx = Number(state.style.customFontSizePx || 48);
+    const fontSizeRem = (sizePx / 36).toFixed(2);
+    el.captionOverlayText.style.fontSize = `${fontSizeRem}rem`;
 
     // Stroke / Outline
     let strokePx = '3px';

@@ -713,11 +713,16 @@ async function generateOverlayPngs(dir, width, height, captions, styleOptions = 
 
   const fontBase64 = getFontBase64(fontFileName);
 
-  let sizeMultiplier = 0.048;
-  if (fontSizeOption === 'small') sizeMultiplier = 0.036;
-  if (fontSizeOption === 'large') sizeMultiplier = 0.060;
-  if (fontSizeOption === 'xlarge') sizeMultiplier = 0.072;
-  const fontSizePx = Math.max(20, Math.round(height * sizeMultiplier));
+  let fontSizePx = 48;
+  if (styleOptions.customFontSizePx) {
+    fontSizePx = Math.max(16, Math.round(height * (Number(styleOptions.customFontSizePx) / 1080)));
+  } else {
+    let sizeMultiplier = 0.048;
+    if (fontSizeOption === 'small') sizeMultiplier = 0.036;
+    if (fontSizeOption === 'large') sizeMultiplier = 0.060;
+    if (fontSizeOption === 'xlarge') sizeMultiplier = 0.072;
+    fontSizePx = Math.max(20, Math.round(height * sizeMultiplier));
+  }
 
   let percent = Number(posYPercent);
   if (isNaN(percent) || percent <= 0) {

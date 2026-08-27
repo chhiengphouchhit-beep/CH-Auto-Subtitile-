@@ -365,14 +365,20 @@
             </div>
           </div>
 
-          <div class="style-group">
-            <label class="style-label" for="font-size-select">Font Size</label>
-            <select id="font-size-select" class="style-select">
-              <option value="small">Small (តូច)</option>
-              <option value="medium" selected>Medium (មធ្យម - 48px)</option>
-              <option value="large">Large (ធំ - 60px)</option>
-              <option value="xlarge">Extra Large (ធំខ្លាំង - 72px)</option>
-            </select>
+          <div class="style-group style-group-full" id="font-size-group">
+            <div class="style-label-row">
+              <label class="style-label" for="font-size-slider">Font Size (ទំហំអក្សរផ្ទាល់ខ្លួន 16px - 120px)</label>
+              <span id="font-size-val" class="style-val-badge">48px</span>
+            </div>
+            <div class="slider-row">
+              <input type="range" id="font-size-slider" min="16" max="120" value="48" step="1" class="style-slider" />
+              <div class="preset-btns">
+                <button type="button" id="size-preset-32" class="btn-preset">តូច (32px)</button>
+                <button type="button" id="size-preset-48" class="btn-preset is-active">មធ្យម (48px)</button>
+                <button type="button" id="size-preset-64" class="btn-preset">ធំ (64px)</button>
+                <button type="button" id="size-preset-84" class="btn-preset">ធំខ្លាំង (84px)</button>
+              </div>
+            </div>
           </div>
 
           <div class="style-group style-group-full">
