@@ -1203,6 +1203,123 @@ textarea:focus, input:focus{ outline: 2px solid var(--accent); outline-offset: 1
   transition: opacity 0.3s ease;
 }
 
+/* CapCut Studio Mode Navigation Tabs */
+.studio-nav-wrapper {
+  max-width: 1400px;
+  margin: 12px auto 0;
+  padding: 0 16px;
+}
+
+.studio-nav-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(13, 17, 23, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 14px;
+  padding: 4px;
+  width: fit-content;
+}
+
+.nav-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: #8b949e;
+  padding: 8px 18px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.nav-tab-btn:hover {
+  color: #f0f6fc;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.nav-tab-btn.is-active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #ffffff;
+  box-shadow: 0 2px 12px rgba(139, 92, 246, 0.35);
+}
+
+.nav-tab-badge {
+  font-size: 0.68rem;
+  background: rgba(255, 255, 255, 0.2);
+  padding: 2px 6px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.capcut-nav-badge {
+  background: linear-gradient(135deg, #ec4899, #f43f5e) !important;
+}
+
+/* Aspect Ratio Preset Cards */
+.ratio-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.ratio-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(13, 17, 23, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.ratio-card:hover {
+  border-color: #a78bfa;
+  background: rgba(139, 92, 246, 0.1);
+  transform: translateY(-2px);
+}
+
+.ratio-card.is-active {
+  border-color: #8b5cf6;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.3));
+  box-shadow: 0 0 14px rgba(139, 92, 246, 0.4);
+}
+
+.ratio-icon {
+  font-size: 1.25rem;
+  margin-bottom: 2px;
+}
+
+.ratio-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #f0f6fc;
+}
+
+.ratio-sub {
+  font-size: 0.68rem;
+  color: #8b949e;
+}
+
+.btn-reset-trim {
+  background: rgba(255, 255, 255, 0.06) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #c9d1d9 !important;
+  margin-left: auto;
+}
+
+.btn-reset-trim:hover {
+  background: rgba(255, 255, 255, 0.15) !important;
+  color: #ffffff !important;
+}
+
 /* CapCut Video Editing Suite Styling */
 .capcut-panel {
   border: 1px solid rgba(99, 102, 241, 0.25) !important;

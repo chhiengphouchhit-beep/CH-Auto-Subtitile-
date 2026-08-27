@@ -87,6 +87,22 @@
     </div>
   </header>
 
+  <!-- CapCut Studio Navigation Tabs -->
+  <div class="studio-nav-wrapper">
+    <nav class="studio-nav-tabs">
+      <button type="button" id="tab-khmer-captions" class="nav-tab-btn is-active">
+        <span class="nav-tab-icon">🎙️</span>
+        <span class="nav-tab-title">AI Khmer Captions</span>
+        <span class="nav-tab-badge">Gemini 2.5</span>
+      </button>
+      <button type="button" id="tab-capcut-editor" class="nav-tab-btn">
+        <span class="nav-tab-icon">✂️</span>
+        <span class="nav-tab-title">CapCut Video Editor</span>
+        <span class="nav-tab-badge capcut-nav-badge">Pro Studio</span>
+      </button>
+    </nav>
+  </div>
+
   <main class="layout">
     <section class="preview-pane">
       <div class="video-shell">
@@ -119,27 +135,49 @@
       </div>
 
       <!-- CapCut Video Editing Suite Panel -->
-      <div class="panel capcut-panel">
+      <div class="panel capcut-panel" id="capcut-studio-panel">
         <div class="panel-label">
-          <span>🎬 CapCut Video Editor (កាត់តវីដេអូ & បន្ថែមតន្ត្រី)</span>
-          <span class="cute-font-badge capcut-badge">PRO TOOLS</span>
+          <span>🎬 CapCut Pro Video Editor (កាត់តវីដេអូ & តន្ត្រីអម)</span>
+          <span class="cute-font-badge capcut-badge">CAPCUT STUDIO UI</span>
         </div>
 
         <div class="capcut-grid">
-          <!-- Aspect Ratio Switcher -->
-          <div class="style-group">
-            <label class="style-label" for="aspect-ratio-select">📐 Video Aspect Ratio (ទំហំវីដេអូ)</label>
-            <select id="aspect-ratio-select" class="style-select">
-              <option value="original" selected>📼 Original Ratio (ទំហំដើមវីដេអូ)</option>
-              <option value="9:16">📱 9:16 Vertical (TikTok / Reels / Shorts)</option>
-              <option value="16:9">💻 16:9 Landscape (YouTube)</option>
-              <option value="1:1">🔲 1:1 Square (Instagram / Facebook)</option>
+          <!-- Visual Aspect Ratio Cards -->
+          <div class="style-group style-group-full">
+            <label class="style-label">📐 Video Aspect Ratio (ទំហំវីដេអូ 1-Click)</label>
+            <div class="ratio-cards-grid">
+              <button type="button" class="ratio-card is-active" data-ratio="original">
+                <span class="ratio-icon">📼</span>
+                <span class="ratio-title">Original</span>
+                <span class="ratio-sub">ទំហំដើម</span>
+              </button>
+              <button type="button" class="ratio-card" data-ratio="9:16">
+                <span class="ratio-icon">📱</span>
+                <span class="ratio-title">9:16</span>
+                <span class="ratio-sub">TikTok / Reels</span>
+              </button>
+              <button type="button" class="ratio-card" data-ratio="16:9">
+                <span class="ratio-icon">💻</span>
+                <span class="ratio-title">16:9</span>
+                <span class="ratio-sub">YouTube</span>
+              </button>
+              <button type="button" class="ratio-card" data-ratio="1:1">
+                <span class="ratio-icon">🔲</span>
+                <span class="ratio-title">1:1</span>
+                <span class="ratio-sub">Instagram</span>
+              </button>
+            </div>
+            <select id="aspect-ratio-select" class="style-select hidden-select" hidden>
+              <option value="original" selected>Original</option>
+              <option value="9:16">9:16</option>
+              <option value="16:9">16:9</option>
+              <option value="1:1">1:1</option>
             </select>
           </div>
 
-          <!-- Video Trimmer -->
+          <!-- Video Trimmer & Cut Presets -->
           <div class="style-group style-group-full">
-            <label class="style-label">✂️ Video Trim & Cut (កាត់តប្រវែងវីដេអូ)</label>
+            <label class="style-label">✂️ Video Trim & Timeline Cut (កាត់តប្រវែងវីដេអូ)</label>
             <div class="trimmer-row">
               <div class="trim-field">
                 <span class="trim-label">Trim Start:</span>
@@ -151,13 +189,14 @@
                 <input type="number" id="trim-end-input" min="0" step="0.1" value="0" class="trim-input" placeholder="End" />
                 <button type="button" id="set-trim-end-btn" class="btn btn-ghost btn-xs" title="កំណត់ពេលបញ្ចប់កាត់តាមវីដេអូបច្ចុប្បន្ន">⏱️ Set End</button>
               </div>
+              <button type="button" id="reset-trim-btn" class="btn btn-ghost btn-xs btn-reset-trim" title="Reset Trim មកពេញវីដេអូដើមវិញ">🔄 Reset Trim</button>
             </div>
           </div>
 
-          <!-- Background Music Overlay -->
+          <!-- Background Music Overlay & Volume Ducking -->
           <div class="style-group style-group-full">
             <div class="style-label-row">
-              <label class="style-label">🎵 Background Music Mixer (តន្ត្រីអមខាងក្រោយ)</label>
+              <label class="style-label">🎵 Background Music Track (តន្ត្រីអម Background)</label>
               <span id="bgm-vol-val" class="style-val-badge">15% Volume</span>
             </div>
             <div class="bgm-row">
@@ -172,7 +211,7 @@
 
           <!-- Watermark Logo Overlay -->
           <div class="style-group style-group-full">
-            <label class="style-label">🖼️ Watermark Logo Overlay (បន្ថែម Logo លើវីដេអូ)</label>
+            <label class="style-label">🖼️ Channel Logo Overlay (បន្ថែម Logo លើវីដេអូ)</label>
             <div class="logo-row">
               <label class="btn btn-ghost btn-xs logo-upload-btn">
                 🖼️ ជ្រើសរើស Logo (.png)

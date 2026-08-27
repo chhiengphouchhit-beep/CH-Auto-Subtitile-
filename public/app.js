@@ -966,6 +966,55 @@ function stopExportAnimation() {
 }
 
 // ---------------------------------------------------------------------------
+// CapCut Studio Navigation & Interactive Cards
+// ---------------------------------------------------------------------------
+
+const tabKhmerCaptions = document.getElementById('tab-khmer-captions');
+const tabCapcutEditor = document.getElementById('tab-capcut-editor');
+const capcutStudioPanel = document.getElementById('capcut-studio-panel');
+
+if (tabKhmerCaptions && tabCapcutEditor) {
+  tabKhmerCaptions.addEventListener('click', () => {
+    tabKhmerCaptions.classList.add('is-active');
+    tabCapcutEditor.classList.remove('is-active');
+    if (capcutStudioPanel) {
+      capcutStudioPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  tabCapcutEditor.addEventListener('click', () => {
+    tabCapcutEditor.classList.add('is-active');
+    tabKhmerCaptions.classList.remove('is-active');
+    if (capcutStudioPanel) {
+      capcutStudioPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+}
+
+// Aspect Ratio Cards Click Listeners
+document.querySelectorAll('.ratio-card').forEach((card) => {
+  card.addEventListener('click', () => {
+    document.querySelectorAll('.ratio-card').forEach((c) => c.classList.remove('is-active'));
+    card.classList.add('is-active');
+    const ratio = card.dataset.ratio || 'original';
+    state.editOptions.aspectRatio = ratio;
+    if (el.aspectRatioSelect) el.aspectRatioSelect.value = ratio;
+    setStatus(`បានជ្រើសរើសទំហំវីដេអូ Aspect Ratio៖ ${ratio}`, 'ok');
+  });
+});
+
+const resetTrimBtn = document.getElementById('reset-trim-btn');
+if (resetTrimBtn) {
+  resetTrimBtn.addEventListener('click', () => {
+    state.editOptions.trimStart = 0;
+    state.editOptions.trimEnd = parseFloat(el.video.duration ? el.video.duration.toFixed(2) : 0);
+    if (el.trimStartInput) el.trimStartInput.value = 0;
+    if (el.trimEndInput) el.trimEndInput.value = state.editOptions.trimEnd;
+    setStatus('បាន Reset Trim មកប្រវែងវីដេអូពេញដើមវិញ!', 'ok');
+  });
+}
+
+// ---------------------------------------------------------------------------
 // CapCut Video Editing Event Listeners
 // ---------------------------------------------------------------------------
 
