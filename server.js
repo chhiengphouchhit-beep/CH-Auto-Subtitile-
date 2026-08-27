@@ -225,10 +225,15 @@ app.post('/api/upload', upload.single('video'), async (req, res) => {
     const id = req.uploadId;
     const dir = path.join(UPLOAD_ROOT, id);
     const sourcePath = req.file.path;
-    const audioPath = path.join(dir, 'audio.wav');
-    const previewPath = path.join(dir, 'preview.mp4');
+    const audioMp3Path = path.join(dir, 'audio.mp3');
 
-    // 1. Extract audio wav for Gemini
+    // 1. Extract audio wav & mp3 for Gemini (16kHz mono 64k for ultra-fast cloud transfer)
+    await execFileAsync(FFMPEG_PATH, [
+      '-y', '-i', sourcePath,
+      '-ac', '1', '-ar', '16000', '-b:a', '64k', '-vn',
+      audioMp3Path,
+    ]);
+
     await execFileAsync(FFMPEG_PATH, [
       '-y', '-i', sourcePath,
       '-ac', '1', '-ar', '16000', '-vn',
@@ -376,7 +381,7 @@ function extractJsonArray(text) {
   return JSON.parse(cleanText.slice(start, end + 1));
 }
 
-async function transcribeWithGemini(audioPath, context, glossary, language = 'km') {
+async function transcribeWithGemini(audioDir, context, glossary, language = 'km') {
   const { GoogleGenerativeAI } = require('@google/generative-ai');
   const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({
@@ -384,16 +389,31 @@ async function transcribeWithGemini(audioPath, context, glossary, language = 'km
     generationConfig: { responseMimeType: 'application/json' },
   });
 
-  const audioBase64 = fs.readFileSync(audioPath).toString('base64');
+  const mp3Path = path.join(audioDir, 'audio.mp3');
+  const wavPath = path.join(audioDir, 'audio.wav');
+  const targetAudio = fs.existsSync(mp3Path) ? mp3Path : wavPath;
+  const mimeType = fs.existsSync(mp3Path) ? 'audio/mp3' : 'audio/wav';
+
+  const audioBase64 = fs.readFileSync(targetAudio).toString('base64');
   const prompt = buildPrompt(context, glossary, language);
 
-  const result = await model.generateContent([
-    { inlineData: { mimeType: 'audio/wav', data: audioBase64 } },
-    { text: prompt },
-  ]);
-
-  const text = result.response.text();
-  return extractJsonArray(text);
+  let lastErr = null;
+  for (let attempt = 1; attempt <= 3; attempt++) {
+    try {
+      console.log(`Gemini AI Transcription Attempt ${attempt}/3 (${targetAudio})...`);
+      const result = await model.generateContent([
+        { inlineData: { mimeType, data: audioBase64 } },
+        { text: prompt },
+      ]);
+      const text = result.response.text();
+      return extractJsonArray(text);
+    } catch (err) {
+      console.warn(`Gemini Attempt ${attempt} failed: ${err.message}`);
+      lastErr = err;
+      if (attempt < 3) await new Promise((r) => setTimeout(r, attempt * 1200));
+    }
+  }
+  throw lastErr || new Error('Gemini AI transcription failed after 3 retries.');
 }
 
 app.post('/api/transcribe', async (req, res) => {
@@ -410,7 +430,7 @@ app.post('/api/transcribe', async (req, res) => {
 
     if (GEMINI_API_KEY) {
       try {
-        captions = await transcribeWithGemini(audioPath, context, glossary, language);
+        captions = await transcribeWithGemini(dir, context, glossary, language);
       } catch (err) {
         console.error('Gemini transcription failed:', err);
         return res.status(500).json({
@@ -424,11 +444,16 @@ app.post('/api/transcribe', async (req, res) => {
     }
 
     const silences = usedMock ? [] : await detectSilences(audioPath);
-    const aligned = captions.map((c) => ({
-      text: cleanKhmerSpaces(String(c.text || '').trim()),
-      start: Number((snapToNearestSilenceEdge(Number(c.start) || 0, silences)).toFixed(2)),
-      end: Number((snapToNearestSilenceEdge(Number(c.end) || 0, silences)).toFixed(2)),
-    }));
+    let aligned = captions
+      .map((c) => {
+        const rawText = cleanKhmerSpaces(String(c.text || '').trim());
+        let s = Number((snapToNearestSilenceEdge(Number(c.start) || 0, silences)).toFixed(2));
+        let e = Number((snapToNearestSilenceEdge(Number(c.end) || 0, silences)).toFixed(2));
+        if (e <= s) e = Number((s + 1.8).toFixed(2));
+        return { text: rawText, start: s, end: e };
+      })
+      .filter((c) => c.text.length > 0)
+      .sort((a, b) => a.start - b.start);
 
     res.json({ captions: aligned, usedMock });
   } catch (err) {
