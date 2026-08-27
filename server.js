@@ -17,6 +17,27 @@ const PORT = process.env.PORT || 1100;
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
 const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 
+let FFMPEG_PATH = path.join(__dirname, 'bin', 'ffmpeg.exe');
+let FFPROBE_PATH = path.join(__dirname, 'bin', 'ffprobe.exe');
+
+if (!fs.existsSync(FFMPEG_PATH)) {
+  try {
+    const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
+    if (ffmpegInstaller && ffmpegInstaller.path) FFMPEG_PATH = ffmpegInstaller.path;
+  } catch (e) {
+    FFMPEG_PATH = 'ffmpeg';
+  }
+}
+
+if (!fs.existsSync(FFPROBE_PATH)) {
+  try {
+    const ffprobeInstaller = require('@ffprobe-installer/ffprobe');
+    if (ffprobeInstaller && ffprobeInstaller.path) FFPROBE_PATH = ffprobeInstaller.path;
+  } catch (e) {
+    FFPROBE_PATH = 'ffprobe';
+  }
+}
+
 const UPLOAD_ROOT = process.env.RENDER || process.env.VERCEL || process.env.NODE_ENV === 'production'
   ? path.join(os.tmpdir(), 'khmer-caption-studio-uploads')
   : path.join(__dirname, 'uploads');
@@ -682,13 +703,7 @@ function timeToSeconds(val) {
   return parseFloat(str) || 0;
 }
 
-let FFMPEG_PATH = 'ffmpeg';
-try {
-  const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
-  if (ffmpegInstaller && ffmpegInstaller.path) {
-    FFMPEG_PATH = ffmpegInstaller.path;
-  }
-} catch (e) {}
+// FFMPEG_PATH is resolved at top of server.js
 
 let CHROMIUM_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
 try {

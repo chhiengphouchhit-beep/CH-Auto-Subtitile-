@@ -11,10 +11,11 @@
   },
   "dependencies": {
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "@ffprobe-installer/ffprobe": "^2.1.2",
     "@google/generative-ai": "^0.21.0",
-    "dotenv": "^16.4.5",
-    "express": "^4.19.2",
-    "multer": "^2.0.0",
+    "dotenv": "^16.6.1",
+    "express": "^4.22.2",
+    "multer": "^2.2.0",
     "puppeteer": "^22.0.0"
   }
 }
