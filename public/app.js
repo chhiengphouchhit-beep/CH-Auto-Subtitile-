@@ -966,30 +966,33 @@ function stopExportAnimation() {
 }
 
 // ---------------------------------------------------------------------------
-// CapCut Studio Navigation & Interactive Cards
+// 1-Page Studio Fullscreen Workspace Navigation Tabs
 // ---------------------------------------------------------------------------
 
-const tabKhmerCaptions = document.getElementById('tab-khmer-captions');
-const tabCapcutEditor = document.getElementById('tab-capcut-editor');
+const tabWorkspaceStyle = document.getElementById('tab-workspace-style');
+const tabWorkspaceCapcut = document.getElementById('tab-workspace-capcut');
+const tabWorkspaceCopyright = document.getElementById('tab-workspace-copyright');
+
+const stylePanel = document.querySelector('.panel:not(.capcut-panel):not(.copyright-panel)');
 const capcutStudioPanel = document.getElementById('capcut-studio-panel');
+const copyrightCheckerPanel = document.getElementById('copyright-checker-panel');
 
-if (tabKhmerCaptions && tabCapcutEditor) {
-  tabKhmerCaptions.addEventListener('click', () => {
-    tabKhmerCaptions.classList.add('is-active');
-    tabCapcutEditor.classList.remove('is-active');
-    if (capcutStudioPanel) {
-      capcutStudioPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  });
+function switchWorkspaceTab(activeTab) {
+  if (tabWorkspaceStyle) tabWorkspaceStyle.classList.toggle('is-active', activeTab === 'style');
+  if (tabWorkspaceCapcut) tabWorkspaceCapcut.classList.toggle('is-active', activeTab === 'capcut');
+  if (tabWorkspaceCopyright) tabWorkspaceCopyright.classList.toggle('is-active', activeTab === 'copyright');
 
-  tabCapcutEditor.addEventListener('click', () => {
-    tabCapcutEditor.classList.add('is-active');
-    tabKhmerCaptions.classList.remove('is-active');
-    if (capcutStudioPanel) {
-      capcutStudioPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  });
+  if (stylePanel) stylePanel.style.display = (activeTab === 'style') ? 'flex' : 'none';
+  if (capcutStudioPanel) capcutStudioPanel.style.display = (activeTab === 'capcut') ? 'flex' : 'none';
+  if (copyrightCheckerPanel) copyrightCheckerPanel.style.display = (activeTab === 'copyright') ? 'flex' : 'none';
 }
+
+if (tabWorkspaceStyle) tabWorkspaceStyle.addEventListener('click', () => switchWorkspaceTab('style'));
+if (tabWorkspaceCapcut) tabWorkspaceCapcut.addEventListener('click', () => switchWorkspaceTab('capcut'));
+if (tabWorkspaceCopyright) tabWorkspaceCopyright.addEventListener('click', () => switchWorkspaceTab('copyright'));
+
+// Default to Style tab
+switchWorkspaceTab('style');
 
 // Aspect Ratio Cards Click Listeners
 document.querySelectorAll('.ratio-card').forEach((card) => {
