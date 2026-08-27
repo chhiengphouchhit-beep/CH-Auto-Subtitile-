@@ -1150,6 +1150,59 @@ textarea:focus, input:focus{ outline: 2px solid var(--accent); outline-offset: 1
   color: #ffffff;
 }
 
+/* Quick Style Themes Bar */
+.style-presets-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.style-presets-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #8b949e;
+  margin-right: 4px;
+}
+
+.btn-theme-preset {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #c9d1d9;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-theme-preset:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.btn-theme-preset.is-active {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: #ffffff;
+  border-color: #34d399;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+}
+
+.auto-save-tag {
+  font-size: 0.72rem;
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+  margin-left: auto;
+  opacity: 0.85;
+  transition: opacity 0.3s ease;
+}
+
 @media (max-width: 767px) {
   .admin-table-container {
     max-height: 220px;

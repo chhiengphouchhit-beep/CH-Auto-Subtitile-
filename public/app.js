@@ -358,10 +358,85 @@ function renderCaptions() {
 // ---------------------------------------------------------------------------
 // Caption Style Control Listeners
 // ---------------------------------------------------------------------------
+// Quick Style Themes
+// ---------------------------------------------------------------------------
+
+const themePresets = {
+  tiktok: { color: '#ffe066', bgStyle: 'pill', bgColor: '#000000', bgOpacity: 78 },
+  minimal: { color: '#ffffff', bgStyle: 'none', bgColor: '#000000', bgOpacity: 0 },
+  pink: { color: '#ffb7c5', bgStyle: 'pill', bgColor: '#1c1917', bgOpacity: 85 },
+  neon: { color: '#34d399', bgStyle: 'solid-black', bgColor: '#000000', bgOpacity: 100 },
+};
+
+document.querySelectorAll('.btn-theme-preset').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.btn-theme-preset').forEach((b) => b.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    const themeKey = btn.dataset.theme;
+    const preset = themePresets[themeKey];
+    if (preset) {
+      if (preset.color) {
+        state.style.color = preset.color;
+        if (el.fontColorPicker) el.fontColorPicker.value = preset.color;
+        if (el.fontColorLabel) el.fontColorLabel.textContent = preset.color.toUpperCase();
+      }
+      if (preset.bgStyle) {
+        state.style.bgStyle = preset.bgStyle;
+        if (el.fontBgStyleSelect) el.fontBgStyleSelect.value = preset.bgStyle;
+        if (el.bgCustomColorGroup) el.bgCustomColorGroup.style.display = preset.bgStyle === 'custom' ? 'flex' : 'none';
+      }
+      if (preset.bgColor) {
+        state.style.bgColor = preset.bgColor;
+        if (el.fontBgColorPicker) el.fontBgColorPicker.value = preset.bgColor;
+        if (el.fontBgColorLabel) el.fontBgColorLabel.textContent = preset.bgColor.toUpperCase();
+      }
+      if (preset.bgOpacity !== undefined) {
+        setBgOpacity(preset.bgOpacity);
+      }
+      updateVideoOverlay();
+      saveLocalBackup();
+    }
+  });
+});
+
+// Auto-Save Backup Helper
+function saveLocalBackup() {
+  try {
+    if (state.captions && state.captions.length > 0) {
+      localStorage.setItem('khmer_caption_studio_backup', JSON.stringify({
+        captions: state.captions,
+        style: state.style,
+        savedAt: new Date().toISOString()
+      }));
+      const tag = document.getElementById('auto-save-tag');
+      if (tag) {
+        tag.style.opacity = '1';
+        setTimeout(() => { tag.style.opacity = '0.7'; }, 1500);
+      }
+    }
+  } catch (e) {}
+}
+
+function restoreLocalBackup() {
+  try {
+    const raw = localStorage.getItem('khmer_caption_studio_backup');
+    if (raw) {
+      const data = JSON.parse(raw);
+      if (data && data.captions && data.captions.length > 0) {
+        state.captions = data.captions;
+        if (data.style) Object.assign(state.style, data.style);
+        renderCaptions();
+        if (el.exportMainBtn) el.exportMainBtn.disabled = false;
+        setStatus('បានស្រង់យកទិន្នន័យ Caption ដែលបានរក្សាទុកចុងក្រោយ (Auto-Restored)!', 'ok');
+      }
+    }
+  } catch (e) {}
+}
 
 el.fontFamilySelect.addEventListener('change', (e) => {
   state.style.fontName = e.target.value;
   updateVideoOverlay();
+  saveLocalBackup();
 });
 
 el.fontColorPicker.addEventListener('input', (e) => {
@@ -369,6 +444,7 @@ el.fontColorPicker.addEventListener('input', (e) => {
   state.style.color = val;
   el.fontColorLabel.textContent = val.toUpperCase();
   updateVideoOverlay();
+  saveLocalBackup();
 });
 
 
@@ -1118,4 +1194,7 @@ async function sendHeartbeat() {
 
 sendHeartbeat();
 setInterval(sendHeartbeat, 8000);
+
+// Auto-restore project backup on load
+restoreLocalBackup();
 
