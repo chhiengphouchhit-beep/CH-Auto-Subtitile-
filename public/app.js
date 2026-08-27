@@ -63,9 +63,15 @@ const el = {
   exportDropdown: document.getElementById('export-dropdown'),
   exportMainBtn: document.getElementById('export-main-btn'),
   exportSrtBtn: document.getElementById('export-srt-btn'),
+  exportVttBtn: document.getElementById('export-vtt-btn'),
+  exportAssBtn: document.getElementById('export-ass-btn'),
   exportVideoBtn: document.getElementById('export-video-btn'),
   exportGreenscreenBtn: document.getElementById('export-greenscreen-btn'),
   exportScreenshotBtn: document.getElementById('export-screenshot-btn'),
+  seekBackBtn: document.getElementById('seek-back-btn'),
+  seekFwdBtn: document.getElementById('seek-fwd-btn'),
+  addCaptionBtn: document.getElementById('add-caption-btn'),
+  captionSearchInput: document.getElementById('caption-search-input'),
   exportModal: document.getElementById('export-modal'),
   exportModalTitle: document.getElementById('export-modal-title'),
   exportModalSub: document.getElementById('export-modal-sub'),
@@ -285,19 +291,27 @@ function renderCaptions() {
     return;
   }
 
+  const query = el.captionSearchInput ? el.captionSearchInput.value.toLowerCase().trim() : '';
+
   state.captions.forEach((cap, i) => {
+    if (query && !cap.text.toLowerCase().includes(query)) return;
+
     const row = document.createElement('div');
     row.className = 'caption-row';
     row.dataset.index = String(i);
 
     row.innerHTML = `
       <div class="caption-row-top">
-        <input type="number" step="0.01" class="start-input" value="${fmtTime(cap.start)}" />
+        <input type="number" step="0.01" class="start-input" value="${fmtTime(cap.start)}" title="Start Time (seconds)" />
         <span class="sep">→</span>
-        <input type="number" step="0.01" class="end-input" value="${fmtTime(cap.end)}" />
-        <button type="button" class="del-btn" title="Delete">🗑</button>
+        <input type="number" step="0.01" class="end-input" value="${fmtTime(cap.end)}" title="End Time (seconds)" />
+        <button type="button" class="del-btn btn-del-cap" title="Delete this caption line">🗑️</button>
       </div>
-      <input type="text" class="caption-text" value="${escapeAttr(cap.text)}" />
+      <input type="text" class="caption-text" value="${escapeAttr(cap.text)}" placeholder="បញ្ចូលអត្ថបទ Caption..." />
+      <div class="cap-actions-row">
+        <button type="button" class="btn-time-set btn-set-start" title="កំណត់ពេលចាប់ផ្តើមតាមវិនាទីវីដេអូបច្ចុប្បន្ន">⏱️ Set Start</button>
+        <button type="button" class="btn-time-set btn-set-end" title="កំណត់ពេលបញ្ចប់តាមវិនាទីវីដេអូបច្ចុប្បន្ន">⏱️ Set End</button>
+      </div>
     `;
 
     row.querySelector('.caption-text').addEventListener('input', (e) => {
@@ -312,13 +326,26 @@ function renderCaptions() {
       state.captions[i].end = parseFloat(e.target.value) || 0;
       updateVideoOverlay();
     });
+    row.querySelector('.btn-set-start').addEventListener('click', (e) => {
+      e.stopPropagation();
+      state.captions[i].start = parseFloat(el.video.currentTime.toFixed(2));
+      renderCaptions();
+      updateVideoOverlay();
+    });
+    row.querySelector('.btn-set-end').addEventListener('click', (e) => {
+      e.stopPropagation();
+      state.captions[i].end = parseFloat(el.video.currentTime.toFixed(2));
+      renderCaptions();
+      updateVideoOverlay();
+    });
     row.querySelector('.del-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       state.captions.splice(i, 1);
       renderCaptions();
       updateVideoOverlay();
     });
-    row.addEventListener('click', () => {
+    row.addEventListener('click', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
       el.video.currentTime = cap.start;
       highlightRow(i);
       updateVideoOverlay();
@@ -497,6 +524,102 @@ el.video.addEventListener('timeupdate', () => {
 });
 
 // ---------------------------------------------------------------------------
+// Pro Player Controls, Seek & Playback Speed
+// ---------------------------------------------------------------------------
+
+if (el.seekBackBtn) {
+  el.seekBackBtn.addEventListener('click', () => {
+    el.video.currentTime = Math.max(0, el.video.currentTime - 5);
+  });
+}
+
+if (el.seekFwdBtn) {
+  el.seekFwdBtn.addEventListener('click', () => {
+    el.video.currentTime = Math.min(el.video.duration || 0, el.video.currentTime + 5);
+  });
+}
+
+document.querySelectorAll('.btn-speed').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.btn-speed').forEach((b) => b.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    const speed = parseFloat(btn.dataset.speed) || 1.0;
+    el.video.playbackRate = speed;
+    setStatus(`បានប្តូរល្បឿនវីដេអូទៅ ${speed}x`, 'ok');
+  });
+});
+
+// Drag & Drop Video Upload Support
+const videoShell = document.querySelector('.video-shell');
+if (videoShell) {
+  ['dragenter', 'dragover'].forEach((eventName) => {
+    videoShell.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      videoShell.classList.add('drag-over');
+    }, false);
+  });
+
+  ['dragleave', 'drop'].forEach((eventName) => {
+    videoShell.addEventListener(eventName, (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      videoShell.classList.remove('drag-over');
+    }, false);
+  });
+
+  videoShell.addEventListener('drop', (e) => {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+    if (files && files.length > 0) {
+      el.fileInput.files = files;
+      el.fileInput.dispatchEvent(new Event('change'));
+    }
+  });
+}
+
+// Timeline Add Caption & Live Search Filter
+if (el.addCaptionBtn) {
+  el.addCaptionBtn.addEventListener('click', () => {
+    const t = parseFloat(el.video.currentTime.toFixed(2)) || 0;
+    const newCap = {
+      start: t,
+      end: parseFloat((t + 3.0).toFixed(2)),
+      text: 'Caption ថ្មី...'
+    };
+    state.captions.push(newCap);
+    state.captions.sort((a, b) => a.start - b.start);
+    renderCaptions();
+    updateVideoOverlay();
+    setStatus('បានបន្ថែមជួរ Caption ថ្មី!', 'ok');
+  });
+}
+
+if (el.captionSearchInput) {
+  el.captionSearchInput.addEventListener('input', () => {
+    renderCaptions();
+  });
+}
+
+// Global Keyboard Shortcuts
+document.addEventListener('keydown', (e) => {
+  const activeTag = document.activeElement ? document.activeElement.tagName : '';
+  if (activeTag === 'INPUT' || activeTag === 'TEXTAREA' || activeTag === 'SELECT') return;
+
+  if (e.code === 'Space') {
+    e.preventDefault();
+    if (el.video.paused) el.video.play();
+    else el.video.pause();
+  } else if (e.code === 'ArrowLeft') {
+    e.preventDefault();
+    el.video.currentTime = Math.max(0, el.video.currentTime - 2);
+  } else if (e.code === 'ArrowRight') {
+    e.preventDefault();
+    el.video.currentTime = Math.min(el.video.duration || 0, el.video.currentTime + 2);
+  }
+});
+
+// ---------------------------------------------------------------------------
 // Export Dropdown & Handlers
 // ---------------------------------------------------------------------------
 
@@ -534,6 +657,67 @@ el.exportSrtBtn.addEventListener('click', async () => {
     setStatus(err.message, 'error');
   }
 });
+
+// Option 1B: Export .VTT Subtitles
+if (el.exportVttBtn) {
+  el.exportVttBtn.addEventListener('click', () => {
+    el.exportDropdown.classList.remove('is-open');
+    if (state.captions.length === 0) return setStatus('មិនទាន់មាន Caption សម្រាប់ Export', 'error');
+
+    let vttContent = 'WEBVTT\n\n';
+    state.captions.forEach((c, idx) => {
+      const s = fmtVttTime(c.start);
+      const e = fmtVttTime(c.end);
+      vttContent += `${idx + 1}\n${s} --> ${e}\n${c.text.trim()}\n\n`;
+    });
+
+    const blob = new Blob([vttContent], { type: 'text/vtt;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'captions.vtt';
+    a.click();
+    URL.revokeObjectURL(url);
+    setStatus('ទាញយកឯកសារ .vtt បានជោគជ័យ!', 'ok');
+  });
+}
+
+function fmtVttTime(seconds) {
+  const s = Math.max(0, Number(seconds) || 0);
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const sec = Math.floor(s % 60);
+  const ms = Math.floor((s - Math.floor(s)) * 1000);
+  const pad = (n, len = 2) => String(n).padStart(len, '0');
+  return `${pad(h)}:${pad(m)}:${pad(sec)}.${pad(ms, 3)}`;
+}
+
+// Option 1C: Export .ASS Subtitles
+if (el.exportAssBtn) {
+  el.exportAssBtn.addEventListener('click', async () => {
+    el.exportDropdown.classList.remove('is-open');
+    if (state.captions.length === 0) return setStatus('មិនទាន់មាន Caption សម្រាប់ Export', 'error');
+
+    try {
+      const res = await fetch('/api/export-ass', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ captions: state.captions, style: state.style }),
+      });
+      if (!res.ok) throw new Error('Export ASS failed.');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'captions.ass';
+      a.click();
+      URL.revokeObjectURL(url);
+      setStatus('ទាញយកឯកសារ .ass ជាមួយ Style រួចរាល់!', 'ok');
+    } catch (err) {
+      setStatus(err.message, 'error');
+    }
+  });
+}
 
 let progressInterval = null;
 

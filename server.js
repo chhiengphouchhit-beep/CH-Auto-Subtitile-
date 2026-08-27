@@ -462,6 +462,15 @@ app.post('/api/export-srt', (req, res) => {
   res.send(body);
 });
 
+app.post('/api/export-ass', (req, res) => {
+  const { captions = [], style = {} } = req.body || {};
+  const assData = generateAssContent(captions, 1280, 720, style, 0);
+
+  res.setHeader('Content-Type', 'text/x-ssa; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="captions.ass"');
+  res.send(assData);
+});
+
 // ---------------------------------------------------------------------------
 // Export Video with Burned-In Captions (Normal or Green Screen)
 // ---------------------------------------------------------------------------

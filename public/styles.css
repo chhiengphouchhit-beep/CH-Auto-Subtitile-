@@ -998,7 +998,159 @@ textarea:focus, input:focus{ outline: 2px solid var(--accent); outline-offset: 1
   .admin-input-text, .admin-select-limit, #create-key-btn {
     width: 100%;
   }
+}
 
+/* Player Controls Toolbar */
+.player-controls-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: rgba(22, 27, 34, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 8px 14px;
+  margin-top: 10px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.seek-group, .speed-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.speed-label {
+  font-size: 0.8rem;
+  color: #8b949e;
+  font-weight: 600;
+  margin-right: 4px;
+}
+
+.btn-speed {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #c9d1d9;
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-speed:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.btn-speed.is-active {
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #ffffff;
+  border-color: #a78bfa;
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
+}
+
+/* Drag & Drop Highlight */
+.video-shell.drag-over {
+  border-color: #6366f1 !important;
+  background: rgba(99, 102, 241, 0.15) !important;
+  box-shadow: 0 0 24px rgba(99, 102, 241, 0.4) !important;
+}
+
+/* Timeline Controls & Search */
+.timeline-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+}
+
+.timeline-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.btn-add-cap {
+  background: rgba(99, 102, 241, 0.15) !important;
+  border: 1px solid rgba(99, 102, 241, 0.3) !important;
+  color: #a78bfa !important;
+  font-size: 0.78rem !important;
+  padding: 4px 10px !important;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.btn-add-cap:hover {
+  background: rgba(99, 102, 241, 0.3) !important;
+  color: #ffffff !important;
+}
+
+.timeline-search-box {
+  margin-bottom: 10px;
+}
+
+.timeline-search-field {
+  width: 100%;
+  background: rgba(13, 17, 23, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 6px 12px;
+  color: #f0f6fc;
+  font-size: 0.82rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.timeline-search-field:focus {
+  border-color: #8b5cf6;
+}
+
+/* Caption Action Buttons */
+.cap-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.btn-time-set {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #8b949e;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-time-set:hover {
+  background: rgba(99, 102, 241, 0.2);
+  color: #a78bfa;
+  border-color: #8b5cf6;
+}
+
+.btn-del-cap {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  border-radius: 4px;
+  padding: 2px 6px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  margin-left: auto;
+  transition: all 0.15s ease;
+}
+
+.btn-del-cap:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: #ffffff;
+}
+
+@media (max-width: 767px) {
   .admin-table-container {
     max-height: 220px;
   }
