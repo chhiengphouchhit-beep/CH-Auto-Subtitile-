@@ -65,9 +65,12 @@ const el = {
   exportSrtBtn: document.getElementById('export-srt-btn'),
   exportVttBtn: document.getElementById('export-vtt-btn'),
   exportAssBtn: document.getElementById('export-ass-btn'),
+  exportTxtBtn: document.getElementById('export-txt-btn'),
   exportVideoBtn: document.getElementById('export-video-btn'),
   exportGreenscreenBtn: document.getElementById('export-greenscreen-btn'),
   exportScreenshotBtn: document.getElementById('export-screenshot-btn'),
+  addEmojisBtn: document.getElementById('add-emojis-btn'),
+  splitPhrasesBtn: document.getElementById('split-phrases-btn'),
   seekBackBtn: document.getElementById('seek-back-btn'),
   seekFwdBtn: document.getElementById('seek-fwd-btn'),
   addCaptionBtn: document.getElementById('add-caption-btn'),
@@ -525,8 +528,90 @@ el.cleanSpacesBtn.addEventListener('click', () => {
 
   renderCaptions();
   updateVideoOverlay();
+  saveLocalBackup();
   setStatus(`បានសំអាត Space រវាងពាក្យខ្មែរចំនួន ${cleanedCount} ជួររួចរាល់!`, 'ok');
 });
+
+// Auto Emoji Injection Engine
+if (el.addEmojisBtn) {
+  el.addEmojisBtn.addEventListener('click', () => {
+    if (state.captions.length === 0) return setStatus('មិនទាន់មាន Caption សម្រាប់បន្ថែម Emojis', 'error');
+
+    const emojiMap = [
+      { keys: ['សាលា', 'រៀន', 'school', 'study'], emoji: '🏫' },
+      { keys: ['សម្រាក', 'ដេក', 'sleep', 'rest', 'relax'], emoji: '😴' },
+      { keys: ['ស្រឡាញ់', 'ស្រលាញ់', 'ស្នេហា', 'love', 'heart'], emoji: '💖' },
+      { keys: ['សប្បាយ', 'ញញឹម', 'សើច', 'happy', 'fun', 'smile'], emoji: '😊' },
+      { keys: ['ញ៉ាំ', 'បាយ', 'ហូប', 'ម្ហូប', 'eat', 'food'], emoji: '🍚' },
+      { keys: ['លុយ', 'ប្រាក់', 'money', 'cash', 'dollar'], emoji: '💵' },
+      { keys: ['វីដេអូ', 'ថត', 'video', 'movie', 'film'], emoji: '🎬' },
+      { keys: ['ទូរស័ព្ទ', 'ទូរសព្ទ', 'phone', 'call', 'mobile'], emoji: '📱' },
+      { keys: ['ឡាន', 'បើក', 'car', 'drive'], emoji: '🚗' },
+      { keys: ['ផ្ទះ', 'home', 'house'], emoji: '🏠' },
+      { keys: ['ហ្គេម', 'game', 'play'], emoji: '🎮' },
+      { keys: ['ចម្រៀង', 'ច្រៀង', 'song', 'music', 'sing'], emoji: '🎙️' },
+      { keys: ['ការងារ', 'ធ្វើការ', 'work', 'job'], emoji: '💼' },
+      { keys: ['ស្រី', 'ស្អាត', 'beautiful', 'girl', 'cute'], emoji: '🌸' },
+      { keys: ['ឆ្ឆាញ់', 'delicious', 'tasty'], emoji: '😋' },
+      { keys: ['ក្តៅ', 'hot', 'fire'], emoji: '🔥' },
+      { keys: ['ត្រជាក់', 'cold', 'ice'], emoji: '❄️' },
+      { keys: ['អស្ចារ្យ', 'ល្អ', 'amazing', 'great', 'good'], emoji: '✨' },
+    ];
+
+    let addedCount = 0;
+    state.captions.forEach((c) => {
+      let text = c.text;
+      emojiMap.forEach(({ keys, emoji }) => {
+        if (!text.includes(emoji)) {
+          const match = keys.some((k) => text.toLowerCase().includes(k));
+          if (match) {
+            text += ` ${emoji}`;
+            addedCount++;
+          }
+        }
+      });
+      c.text = text;
+    });
+
+    renderCaptions();
+    updateVideoOverlay();
+    saveLocalBackup();
+    setStatus(`បានបន្ថែម Emojis ស្វ័យប្រវត្តិចំនួន ${addedCount} កន្លែងរួចរាល់!`, 'ok');
+  });
+}
+
+// Short Viral Phrase Splitter Engine
+if (el.splitPhrasesBtn) {
+  el.splitPhrasesBtn.addEventListener('click', () => {
+    if (state.captions.length === 0) return setStatus('មិនទាន់មាន Caption សម្រាប់បំបែក', 'error');
+
+    const newCaptions = [];
+    let splitCount = 0;
+
+    state.captions.forEach((c) => {
+      const words = c.text.trim().split(/\s+/);
+      if (words.length > 6) {
+        const mid = Math.ceil(words.length / 2);
+        const text1 = words.slice(0, mid).join(' ');
+        const text2 = words.slice(mid).join(' ');
+        const duration = c.end - c.start;
+        const midTime = parseFloat((c.start + duration / 2).toFixed(2));
+
+        newCaptions.push({ start: c.start, end: midTime, text: text1 });
+        newCaptions.push({ start: midTime, end: c.end, text: text2 });
+        splitCount++;
+      } else {
+        newCaptions.push(c);
+      }
+    });
+
+    state.captions = newCaptions;
+    renderCaptions();
+    updateVideoOverlay();
+    saveLocalBackup();
+    setStatus(`បានបំបែកល្បះវែងៗចំនួន ${splitCount} ជួរទៅជាឃ្លាខ្លីៗរលូន!`, 'ok');
+  });
+}
 
 function highlightRow(activeIndex) {
   el.captionsList.querySelectorAll('.caption-row').forEach((r) => {
@@ -755,6 +840,24 @@ if (el.exportVttBtn) {
     a.click();
     URL.revokeObjectURL(url);
     setStatus('ទាញយកឯកសារ .vtt បានជោគជ័យ!', 'ok');
+  });
+}
+
+// Option 1D: Export Plain Text (.TXT)
+if (el.exportTxtBtn) {
+  el.exportTxtBtn.addEventListener('click', () => {
+    el.exportDropdown.classList.remove('is-open');
+    if (state.captions.length === 0) return setStatus('មិនទាន់មាន Caption សម្រាប់ Export', 'error');
+
+    const txtContent = state.captions.map((c) => c.text.trim()).join('\n');
+    const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'transcript.txt';
+    a.click();
+    URL.revokeObjectURL(url);
+    setStatus('ទាញយកឯកសារអត្ថបទសុទ្ធ .txt រួចរាល់!', 'ok');
   });
 }
 

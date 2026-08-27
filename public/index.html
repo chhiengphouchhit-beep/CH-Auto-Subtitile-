@@ -54,6 +54,13 @@
               <span class="item-desc">ឯកសារ SubStation Alpha ជាមួយ Font & Style ស្រាប់</span>
             </div>
           </button>
+          <button class="dropdown-item" id="export-txt-btn">
+            <span class="icon">📝</span>
+            <div class="item-text">
+              <span class="item-title">Export Plain Text (.TXT)</span>
+              <span class="item-desc">ទាញយកតែអត្ថបទសុទ្ធ (គ្មានលេខវិនាទី)</span>
+            </div>
+          </button>
           <button class="dropdown-item" id="export-video-btn">
             <span class="icon">🎬</span>
             <div class="item-text">
@@ -207,8 +214,14 @@
         </div>
 
         <div class="tools-row">
-          <button type="button" id="clean-spaces-btn" class="btn btn-ghost btn-sm">
+          <button type="button" id="clean-spaces-btn" class="btn btn-ghost btn-sm" title="លុប Space មិនចាំបាច់រវាងពាក្យខ្មែរ">
             ✨ លុប Space រវាងពាក្យខ្មែរ (Clean Khmer Spaces)
+          </button>
+          <button type="button" id="add-emojis-btn" class="btn btn-ghost btn-sm" title="ស្វ័យប្រវត្តិកូដបន្ថែម Emoji ស្អាតៗក្នុង Caption">
+            😍 បន្ថែម Auto Emojis
+          </button>
+          <button type="button" id="split-phrases-btn" class="btn btn-ghost btn-sm" title="បំបែកល្បះវែងៗទៅជាឃ្លាខ្លីៗ (Short Viral Phrases)">
+            ✂️ បំបែកល្បះខ្លីៗ (Viral Phrases)
           </button>
         </div>
         </div>
