@@ -156,8 +156,7 @@ checkHealth();
 // Upload
 // ---------------------------------------------------------------------------
 
-el.fileInput.addEventListener('change', async () => {
-  const file = el.fileInput.files[0];
+async function handleFileUpload(file) {
   if (!file) return;
 
   setStatus('កំពុងផ្ទុកឡើង និងកែច្នៃ audio…');
@@ -174,14 +173,49 @@ el.fileInput.addEventListener('change', async () => {
 
     el.video.src = data.videoUrl;
     el.video.load();
-    el.videoEmpty.style.display = 'none';
+    if (el.videoEmpty) el.videoEmpty.style.display = 'none';
     el.video.style.display = 'block';
-    el.generateBtn.disabled = false;
+    if (el.generateBtn) el.generateBtn.disabled = false;
     setStatus(`បានផ្ទុក — ប្រវែង ${data.duration.toFixed(1)}s`, 'ok');
   } catch (err) {
     setStatus(err.message, 'error');
   }
-});
+}
+
+if (el.fileInput) {
+  el.fileInput.addEventListener('change', () => {
+    if (el.fileInput.files && el.fileInput.files[0]) {
+      handleFileUpload(el.fileInput.files[0]);
+    }
+  });
+}
+
+const fileInputTopbar = document.getElementById('file-input-topbar');
+if (fileInputTopbar) {
+  fileInputTopbar.addEventListener('change', () => {
+    if (fileInputTopbar.files && fileInputTopbar.files[0]) {
+      handleFileUpload(fileInputTopbar.files[0]);
+    }
+  });
+}
+
+const videoShell = document.querySelector('.video-shell');
+if (videoShell) {
+  videoShell.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    videoShell.classList.add('drag-over');
+  });
+  videoShell.addEventListener('dragleave', () => {
+    videoShell.classList.remove('drag-over');
+  });
+  videoShell.addEventListener('drop', (e) => {
+    e.preventDefault();
+    videoShell.classList.remove('drag-over');
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+      handleFileUpload(e.dataTransfer.files[0]);
+    }
+  });
+}
 
 // ---------------------------------------------------------------------------
 // Protected vocabulary tags
@@ -762,34 +796,7 @@ document.querySelectorAll('.btn-speed').forEach((btn) => {
   });
 });
 
-// Drag & Drop Video Upload Support
-const videoShell = document.querySelector('.video-shell');
-if (videoShell) {
-  ['dragenter', 'dragover'].forEach((eventName) => {
-    videoShell.addEventListener(eventName, (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      videoShell.classList.add('drag-over');
-    }, false);
-  });
-
-  ['dragleave', 'drop'].forEach((eventName) => {
-    videoShell.addEventListener(eventName, (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      videoShell.classList.remove('drag-over');
-    }, false);
-  });
-
-  videoShell.addEventListener('drop', (e) => {
-    const dt = e.dataTransfer;
-    const files = dt.files;
-    if (files && files.length > 0) {
-      el.fileInput.files = files;
-      el.fileInput.dispatchEvent(new Event('change'));
-    }
-  });
-}
+// Drag and drop handled above
 
 // Timeline Add Caption & Live Search Filter
 if (el.addCaptionBtn) {
