@@ -874,27 +874,30 @@ if (closeExportSelectorBtn) {
 }
 
 // Option 1: Export .SRT Subtitles
-el.exportSrtBtn.addEventListener('click', async () => {
-  closeExportSelectorModal();
-  try {
-    const res = await fetch('/api/export-srt', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ captions: state.captions }),
-    });
-    if (!res.ok) throw new Error('Export SRT failed.');
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'captions.srt';
-    a.click();
-    URL.revokeObjectURL(url);
-    setStatus('ទាញយកឯកសារ .srt បានជោគជ័យ!', 'ok');
-  } catch (err) {
-    setStatus(err.message, 'error');
-  }
-});
+if (el.exportSrtBtn) {
+  el.exportSrtBtn.addEventListener('click', async () => {
+    closeExportSelectorModal();
+    if (state.captions.length === 0) return setStatus('មិនទាន់មាន Caption សម្រាប់ Export', 'error');
+    try {
+      const res = await fetch('/api/export-srt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ captions: state.captions }),
+      });
+      if (!res.ok) throw new Error('Export SRT failed.');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'captions.srt';
+      a.click();
+      URL.revokeObjectURL(url);
+      setStatus('ទាញយកឯកសារ .srt បានជោគជ័យ!', 'ok');
+    } catch (err) {
+      setStatus(err.message, 'error');
+    }
+  });
+}
 
 // Option 1B: Export .VTT Subtitles
 if (el.exportVttBtn) {
@@ -1221,94 +1224,99 @@ if (el.logoPosSelect) {
 }
 
 // Option 2: Export Video with Burned-In Captions (.MP4)
-el.exportVideoBtn.addEventListener('click', async () => {
-  closeExportSelectorModal();
-  if (!state.uploadId) return setStatus('សូម Upload វីដេអូជាមុនសិន', 'error');
+if (el.exportVideoBtn) {
+  el.exportVideoBtn.addEventListener('click', async () => {
+    closeExportSelectorModal();
+    if (!state.uploadId) return setStatus('សូម Upload វីដេអូជាមុនសិន', 'error');
 
-  setStatus('កំពុង Render វីដេអូជាមួយ Caption (សូមរង់ចាំបន្តិច)...');
-  el.exportMainBtn.disabled = true;
-  startExportAnimation('កំពុង Render វីដេអូជាមួយ Caption...', state.style.fontName);
+    setStatus('កំពុង Render វីដេអូជាមួយ Caption (សូមរង់ចាំបន្តិច)...');
+    if (el.exportMainBtn) el.exportMainBtn.disabled = true;
+    startExportAnimation('កំពុង Render វីដេអូជាមួយ Caption...', state.style.fontName);
 
-  try {
-    const res = await fetch('/api/export-video', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Access-Key': getAccessKey() },
-      body: JSON.stringify({
-        id: state.uploadId,
-        captions: state.captions,
-        greenScreen: false,
-        style: state.style,
-        editOptions: state.editOptions,
-        accessKey: getAccessKey()
-      }),
-    });
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || errData.detail || 'Export Video failed.');
+    try {
+      const res = await fetch('/api/export-video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Access-Key': getAccessKey() },
+        body: JSON.stringify({
+          id: state.uploadId,
+          captions: state.captions,
+          greenScreen: false,
+          style: state.style,
+          editOptions: state.editOptions,
+          accessKey: getAccessKey()
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || errData.detail || 'Export Video failed.');
+      }
+      const blob = await res.blob();
+      finishExportAnimation();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'video_with_captions.mp4';
+      a.click();
+      URL.revokeObjectURL(url);
+      setStatus('ទាញយកវីដេអូជាមួយ Caption (.mp4) រួចរាល់!', 'ok');
+    } catch (err) {
+      stopExportAnimation();
+      setStatus(err.message, 'error');
+    } finally {
+      if (el.exportMainBtn) el.exportMainBtn.disabled = false;
     }
-    const blob = await res.blob();
-    finishExportAnimation();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'video_with_captions.mp4';
-    a.click();
-    URL.revokeObjectURL(url);
-    setStatus('ទាញយកវីដេអូជាមួយ Caption (.mp4) រួចរាល់!', 'ok');
-  } catch (err) {
-    stopExportAnimation();
-    setStatus(err.message, 'error');
-  } finally {
-    el.exportMainBtn.disabled = false;
-  }
-});
+  });
+}
 
 // Option 3: Export Green Screen Video (.MP4)
-el.exportGreenscreenBtn.addEventListener('click', async () => {
-  closeExportSelectorModal();
-  if (!state.uploadId) return setStatus('សូម Upload វីដេអូជាមុនសិន', 'error');
+if (el.exportGreenscreenBtn) {
+  el.exportGreenscreenBtn.addEventListener('click', async () => {
+    closeExportSelectorModal();
+    if (!state.uploadId) return setStatus('សូម Upload វីដេអូជាមុនសិន', 'error');
 
-  setStatus('កំពុង Render វីដេអូ Green Screen (#00FF00)...');
-  el.exportMainBtn.disabled = true;
-  startExportAnimation('កំពុង Render វីដេអូ Green Screen...', state.style.fontName);
+    setStatus('កំពុង Render វីដេអូ Green Screen (#00FF00)...');
+    if (el.exportMainBtn) el.exportMainBtn.disabled = true;
+    startExportAnimation('កំពុង Render វីដេអូ Green Screen...', state.style.fontName);
 
-  try {
-    const res = await fetch('/api/export-video', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Access-Key': getAccessKey() },
-      body: JSON.stringify({
-        id: state.uploadId,
-        captions: state.captions,
-        greenScreen: true,
-        style: state.style,
-        editOptions: state.editOptions,
-        accessKey: getAccessKey()
-      }),
-    });
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || errData.detail || 'Export Green Screen failed.');
+    try {
+      const res = await fetch('/api/export-video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Access-Key': getAccessKey() },
+        body: JSON.stringify({
+          id: state.uploadId,
+          captions: state.captions,
+          greenScreen: true,
+          style: state.style,
+          editOptions: state.editOptions,
+          accessKey: getAccessKey()
+        }),
+      });
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData.error || errData.detail || 'Export Green Screen failed.');
+      }
+      const blob = await res.blob();
+      finishExportAnimation();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'captions_greenscreen.mp4';
+      a.click();
+      URL.revokeObjectURL(url);
+      setStatus('ទាញយកវីដេអូ Green Screen (.mp4) រួចរាល់!', 'ok');
+    } catch (err) {
+      stopExportAnimation();
+      setStatus(err.message, 'error');
+    } finally {
+      if (el.exportMainBtn) el.exportMainBtn.disabled = false;
     }
-    const blob = await res.blob();
-    finishExportAnimation();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'captions_greenscreen.mp4';
-    a.click();
-    URL.revokeObjectURL(url);
-    setStatus('ទាញយកវីដេអូ Green Screen (.mp4) រួចរាល់!', 'ok');
-  } catch (err) {
-    stopExportAnimation();
-    setStatus(err.message, 'error');
-  } finally {
-    el.exportMainBtn.disabled = false;
-  }
-});
+  });
+}
 
 // Option 4: Export Screenshot with Overlay (.PNG)
-el.exportScreenshotBtn.addEventListener('click', () => {
-  closeExportSelectorModal();
+if (el.exportScreenshotBtn) {
+  el.exportScreenshotBtn.addEventListener('click', () => {
+    closeExportSelectorModal();
   if (!el.video.videoWidth) return setStatus('មិនទាន់មានវីដេអូ playable', 'error');
 
   const canvas = document.createElement('canvas');
@@ -1375,7 +1383,8 @@ el.exportScreenshotBtn.addEventListener('click', () => {
   a.download = `caption_screenshot_${fmtTime(el.video.currentTime)}s.png`;
   a.click();
   setStatus('ទាញយក Screenshot បានជោគជ័យ!', 'ok');
-});
+  });
+}
 
 // ---------------------------------------------------------------------------
 // Helpers
