@@ -864,7 +864,6 @@ function closeExportSelectorModal() {
 if (el.exportMainBtn) {
   el.exportMainBtn.addEventListener('click', (e) => {
     e.stopPropagation();
-    if (el.exportMainBtn.disabled) return;
     openExportSelectorModal();
   });
 }
