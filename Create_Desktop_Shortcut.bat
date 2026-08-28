@@ -1,13 +1,22 @@
 @echo off
-set SCRIPT="%TEMP%\%RANDOM%-%RANDOM%.vbs"
-set DESKTOP=%USERPROFILE%\Desktop
-echo Set oWS = WScript.CreateObject("WScript.Shell") > %SCRIPT%
-echo sLinkFile = "%DESKTOP%\Khmer Caption Studio.lnk" >> %SCRIPT%
-echo Set oLink = oWS.CreateShortcut(sLinkFile) >> %SCRIPT%
-echo oLink.TargetPath = "D:\khmer-caption-studio\Launch_Desktop_App.vbs" >> %SCRIPT%
-echo oLink.WorkingDirectory = "D:\khmer-caption-studio" >> %SCRIPT%
-echo oLink.Description = "Khmer Caption Studio Desktop App" >> %SCRIPT%
-echo oLink.Save >> %SCRIPT%
-cscript //nologo %SCRIPT%
-del %SCRIPT%
-echo Desktop shortcut created successfully on Desktop!
+title Creating Desktop Shortcut...
+cd /d "%~dp0"
+
+echo ==================================================
+echo 🎬 Creating Khmer Caption Studio Desktop Shortcut...
+echo ==================================================
+
+set "TARGET_BAT=%~dp0Start_Khmer_Caption_Studio.bat"
+set "ICON_PATH=%~dp0app_icon.ico"
+set "SHORTCUT_PATH=%USERPROFILE%\Desktop\Khmer Caption Studio.lnk"
+
+powershell -ExecutionPolicy Bypass -Command "$ws = New-Object -ComObject WScript.Shell; $s = $ws.CreateShortcut('%SHORTCUT_PATH%'); $s.TargetPath = '%TARGET_BAT%'; $s.WorkingDirectory = '%~dp0'; $s.IconLocation = '%ICON_PATH%'; $s.Description = 'Khmer Caption Studio - AI Subtitle & Video Editor'; $s.Save()"
+
+if exist "%SHORTCUT_PATH%" (
+    echo ✨ SUCCESS: Khmer Caption Studio shortcut created on your Desktop!
+    echo 📌 Icon: app_icon.ico
+) else (
+    echo ❌ Failed to create desktop shortcut.
+)
+
+pause
