@@ -60,32 +60,54 @@
 
   <main class="layout">
     <section class="preview-pane">
-      <div class="video-shell">
-        <video id="video" controls></video>
+      <div class="video-shell" id="video-shell">
+        <video id="video"></video>
         <div id="caption-overlay" class="caption-overlay">
           <span id="caption-overlay-text" class="caption-overlay-text"></span>
         </div>
         <div id="video-empty" class="video-empty">
-          <p>ផ្ទុកឡើងវីដេអូ ឬ audio ដើម្បីចាប់ផ្តើម (Drag & Drop or Click)</p>
-          <label class="btn btn-primary">
-            ជ្រើសរើសឯកសារ
+          <div class="drop-icon">🎬</div>
+          <p class="drop-title">ទម្លាក់វីដេអូ ឬ Audio នៅទីនេះ</p>
+          <p class="drop-sub">Drag & Drop video file or click button below</p>
+          <label class="btn btn-primary btn-lg drop-btn">
+            📂 ជ្រើសរើសវីដេអូ / Audio
             <input id="file-input" type="file" accept="video/*,audio/*" hidden />
           </label>
+          <div class="format-badges">
+            <span class="fmt-badge">MP4</span>
+            <span class="fmt-badge">MOV</span>
+            <span class="fmt-badge">MKV</span>
+            <span class="fmt-badge">MP3</span>
+            <span class="fmt-badge">WAV</span>
+          </div>
         </div>
       </div>
 
+      <!-- Full Pro Player Controls Bar -->
       <div class="player-controls-bar">
-        <div class="seek-group">
+        <div class="player-left-controls">
+          <button type="button" id="play-pause-btn" class="btn btn-primary btn-xs btn-play" title="Play/Pause">
+            <span id="play-icon">▶️</span>
+          </button>
           <button type="button" id="seek-back-btn" class="btn btn-ghost btn-xs" title="ថយក្រោយ 5 វិនាទី (-5s)">⏮️ -5s</button>
           <button type="button" id="seek-fwd-btn" class="btn btn-ghost btn-xs" title="ទៅមុខ 5 វិនាទី (+5s)">+5s ⏭️</button>
+          <span id="time-display" class="time-code">00:00 / 00:00</span>
         </div>
-        <div class="speed-group">
-          <span class="speed-label">⚡ ល្បឿន៖</span>
-          <button type="button" class="btn-speed" data-speed="0.5">0.5x</button>
-          <button type="button" class="btn-speed is-active" data-speed="1.0">1.0x</button>
-          <button type="button" class="btn-speed" data-speed="1.25">1.25x</button>
-          <button type="button" class="btn-speed" data-speed="1.5">1.5x</button>
-          <button type="button" class="btn-speed" data-speed="2.0">2.0x</button>
+
+        <div class="player-seek-wrapper">
+          <input type="range" id="video-seek-slider" min="0" max="100" value="0" step="0.1" class="player-seek-slider" title="Seek video time" />
+        </div>
+
+        <div class="player-right-controls">
+          <div class="speed-group">
+            <span class="speed-label">⚡</span>
+            <button type="button" class="btn-speed" data-speed="0.5">0.5x</button>
+            <button type="button" class="btn-speed is-active" data-speed="1.0">1.0x</button>
+            <button type="button" class="btn-speed" data-speed="1.25">1.25x</button>
+            <button type="button" class="btn-speed" data-speed="1.5">1.5x</button>
+            <button type="button" class="btn-speed" data-speed="2.0">2.0x</button>
+          </div>
+          <button type="button" id="fullscreen-btn" class="btn btn-ghost btn-xs" title="Fullscreen Full Video">⛶</button>
         </div>
       </div>
 

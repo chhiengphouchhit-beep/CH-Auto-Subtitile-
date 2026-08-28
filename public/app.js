@@ -218,6 +218,82 @@ if (videoShell) {
 }
 
 // ---------------------------------------------------------------------------
+// Interactive Pro Video Player Controls & Seek Slider
+// ---------------------------------------------------------------------------
+
+const playPauseBtn = document.getElementById('play-pause-btn');
+const playIcon = document.getElementById('play-icon');
+const timeDisplay = document.getElementById('time-display');
+const videoSeekSlider = document.getElementById('video-seek-slider');
+const fullscreenBtn = document.getElementById('fullscreen-btn');
+
+function fmtTimecode(seconds) {
+  const s = Math.max(0, Number(seconds) || 0);
+  const m = Math.floor(s / 60);
+  const sec = Math.floor(s % 60);
+  const pad = (n) => String(n).padStart(2, '0');
+  return `${pad(m)}:${pad(sec)}`;
+}
+
+if (playPauseBtn && el.video) {
+  playPauseBtn.addEventListener('click', () => {
+    if (el.video.paused) {
+      el.video.play();
+      if (playIcon) playIcon.textContent = '⏸️';
+    } else {
+      el.video.pause();
+      if (playIcon) playIcon.textContent = '▶️';
+    }
+  });
+}
+
+if (el.video) {
+  el.video.addEventListener('play', () => {
+    if (playIcon) playIcon.textContent = '⏸️';
+  });
+  el.video.addEventListener('pause', () => {
+    if (playIcon) playIcon.textContent = '▶️';
+  });
+  el.video.addEventListener('timeupdate', () => {
+    const cur = el.video.currentTime || 0;
+    const dur = el.video.duration || state.duration || 0;
+    if (timeDisplay) {
+      timeDisplay.textContent = `${fmtTimecode(cur)} / ${fmtTimecode(dur)}`;
+    }
+    if (videoSeekSlider && dur > 0) {
+      videoSeekSlider.max = dur;
+      videoSeekSlider.value = cur;
+    }
+
+    // Auto-Highlight Active Caption Card on Timeline
+    if (state.captions && state.captions.length > 0) {
+      const activeIdx = state.captions.findIndex((c) => cur >= c.start && cur < c.end);
+      document.querySelectorAll('.caption-row').forEach((row, i) => {
+        const isActive = i === activeIdx;
+        row.classList.toggle('is-active', isActive);
+      });
+    }
+  });
+}
+
+if (videoSeekSlider && el.video) {
+  videoSeekSlider.addEventListener('input', () => {
+    el.video.currentTime = parseFloat(videoSeekSlider.value);
+  });
+}
+
+if (fullscreenBtn && el.video) {
+  fullscreenBtn.addEventListener('click', () => {
+    const shell = document.getElementById('video-shell') || el.video;
+    if (document.fullscreenElement) {
+      document.exitFullscreen();
+    } else if (shell.requestFullscreen) {
+      shell.requestFullscreen();
+    }
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Protected vocabulary tags
 // ---------------------------------------------------------------------------
 
