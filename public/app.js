@@ -159,6 +159,13 @@ checkHealth();
 async function handleFileUpload(file) {
   if (!file) return;
 
+  // Clear previous video's captions & state automatically
+  state.captions = [];
+  state.editOptions.trimStart = 0;
+  state.editOptions.trimEnd = 0;
+  if (el.captionOverlayText) el.captionOverlayText.textContent = '';
+  renderCaptions();
+
   setStatus('កំពុងផ្ទុកឡើង និងកែច្នៃ audio…');
   const form = new FormData();
   form.append('video', file);
@@ -486,6 +493,19 @@ function renderCaptions() {
     });
 
     el.captionsList.appendChild(row);
+  });
+}
+
+const clearAllCaptionsBtn = document.getElementById('clear-all-captions-btn');
+if (clearAllCaptionsBtn) {
+  clearAllCaptionsBtn.addEventListener('click', () => {
+    if (state.captions.length === 0) return setStatus('គ្មាន Caption សម្រាប់លុបឡើយ', 'error');
+    if (confirm('តើបងប្រាកដថាចង់លុប Caption ទាំងអស់ចេញមែនទេ?')) {
+      state.captions = [];
+      if (el.captionOverlayText) el.captionOverlayText.textContent = '';
+      renderCaptions();
+      setStatus('បានលុប Caption ទាំងអស់រួចរាល់!', 'ok');
+    }
   });
 }
 
