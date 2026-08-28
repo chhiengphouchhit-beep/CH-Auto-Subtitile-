@@ -703,29 +703,31 @@ function timeToSeconds(val) {
   return parseFloat(str) || 0;
 }
 
-// FFMPEG_PATH is resolved at top of server.js
-
-let CHROMIUM_PATH = 'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe';
-try {
-  const puppeteer = require('puppeteer');
-  if (puppeteer.executablePath()) {
-    CHROMIUM_PATH = puppeteer.executablePath();
-  }
-} catch (e) {
-  const candidatePaths = [
+function getChromiumPath() {
+  const candidates = [
     'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
     'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
-    '/usr/bin/google-chrome',
-    '/usr/bin/chromium-browser',
-    '/usr/bin/chromium',
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+    path.join(process.env.LOCALAPPDATA || '', 'Google\\Chrome\\Application\\chrome.exe'),
+    path.join(process.env.LOCALAPPDATA || '', 'Microsoft\\Edge\\Application\\msedge.exe'),
+    path.join(process.env.PROGRAMFILES || '', 'Microsoft\\Edge\\Application\\msedge.exe'),
+    path.join(process.env['PROGRAMFILES(X86)'] || '', 'Microsoft\\Edge\\Application\\msedge.exe'),
+    path.join(process.env.PROGRAMFILES || '', 'Google\\Chrome\\Application\\chrome.exe'),
+    path.join(process.env['PROGRAMFILES(X86)'] || '', 'Google\\Chrome\\Application\\chrome.exe'),
   ];
-  for (const p of candidatePaths) {
-    if (fs.existsSync(p)) {
-      CHROMIUM_PATH = p;
-      break;
-    }
+  for (const c of candidates) {
+    if (c && fs.existsSync(c)) return c;
   }
+  try {
+    const puppeteer = require('puppeteer');
+    const pPath = puppeteer.executablePath();
+    if (pPath && fs.existsSync(pPath)) return pPath;
+  } catch (e) {}
+  return null;
 }
+
+let CHROMIUM_PATH = getChromiumPath();
 
 const fontBase64Cache = {};
 
@@ -940,7 +942,7 @@ app.post('/api/check-copyright', async (req, res) => {
     let hasAudio = false;
 
     try {
-      const { stdout } = await execFileAsync('ffprobe', [
+      const { stdout } = await execFileAsync(FFPROBE_PATH, [
         '-v', 'error',
         '-select_streams', 'a:0',
         '-show_entries', 'stream=codec_name,sample_rate,channels',
@@ -1013,7 +1015,7 @@ app.post('/api/export-video', async (req, res) => {
     let duration = 0;
 
     try {
-      const { stdout: wOut } = await execFileAsync('ffprobe', [
+      const { stdout: wOut } = await execFileAsync(FFPROBE_PATH, [
         '-v', 'error',
         '-select_streams', 'v:0',
         '-show_entries', 'stream=width',
@@ -1025,7 +1027,7 @@ app.post('/api/export-video', async (req, res) => {
     } catch (e) {}
 
     try {
-      const { stdout: hOut } = await execFileAsync('ffprobe', [
+      const { stdout: hOut } = await execFileAsync(FFPROBE_PATH, [
         '-v', 'error',
         '-select_streams', 'v:0',
         '-show_entries', 'stream=height',
@@ -1037,7 +1039,7 @@ app.post('/api/export-video', async (req, res) => {
     } catch (e) {}
 
     try {
-      const { stdout: dOut } = await execFileAsync('ffprobe', [
+      const { stdout: dOut } = await execFileAsync(FFPROBE_PATH, [
         '-v', 'error',
         '-show_entries', 'format=duration',
         '-of', 'default=noprint_wrappers=1:nokey=1',
