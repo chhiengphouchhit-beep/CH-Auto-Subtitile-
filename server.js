@@ -662,13 +662,9 @@ Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text
 `;
 
   const events = captions
-    .map((c, idx) => {
-      const isLast = idx === captions.length - 1;
+    .map((c) => {
       const startSec = timeToSeconds(c.start);
-      let endSec = timeToSeconds(c.end);
-      if (isLast && videoDuration > 0) {
-        endSec = Math.max(endSec, videoDuration);
-      }
+      const endSec = timeToSeconds(c.end);
       const start = srtToAssTimestamp(startSec);
       const end = srtToAssTimestamp(endSec);
       const text = String(c.text || '').replace(/\r?\n/g, '\\N');
@@ -814,18 +810,13 @@ async function generateOverlayPngs(dir, width, height, captions, styleOptions = 
 
   const validCaps = captions
     .map((c, idx) => {
-      const isLast = idx === captions.length - 1;
       const startSec = timeToSeconds(c.start);
-      let endSec = timeToSeconds(c.end);
-      if (isLast && videoDuration > 0) {
-        endSec = Math.max(endSec, videoDuration);
-      }
+      const endSec = timeToSeconds(c.end);
       return {
         index: idx,
         text: String(c.text || '').trim(),
         start: startSec,
         end: endSec,
-        isLast,
       };
     })
     .filter((c) => c.text && c.end > c.start);
@@ -1097,7 +1088,7 @@ app.post('/api/export-video', async (req, res) => {
         const isLast = idx === overlayItems.length - 1;
         const outStream = isLast ? 'outv' : `v${idx + 1}`;
         const inputIdx = idx + 1;
-        const enableCond = isLast ? `gte(t,${item.start})` : `between(t,${item.start},${item.end})`;
+        const enableCond = `between(t,${item.start},${item.end})`;
         filterStr += `[${prevStream}][${inputIdx}:v]overlay=0:0:enable='${enableCond}'[${outStream}];`;
         prevStream = outStream;
       });
