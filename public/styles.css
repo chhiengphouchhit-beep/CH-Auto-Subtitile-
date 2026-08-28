@@ -1610,6 +1610,85 @@ textarea:focus, input:focus{ border-color: #8b5cf6; outline: none; box-shadow: 0
   line-height: 1.35;
 }
 
+/* Export Selector Modal */
+.selector-card {
+  max-width: 680px !important;
+  width: 92% !important;
+  padding: 24px !important;
+  background: rgba(13, 17, 24, 0.96) !important;
+  backdrop-filter: blur(24px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.18) !important;
+  border-radius: 20px !important;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.85) !important;
+}
+
+.selector-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.selector-card-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #f0f6fc;
+}
+
+.selector-card-sub {
+  font-size: 0.84rem;
+  color: #8b949e;
+  margin-bottom: 18px;
+}
+
+.export-options-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.export-option-card {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: rgba(22, 27, 34, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: #f0f6fc;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-option-card:hover {
+  background: rgba(99, 102, 241, 0.18);
+  border-color: rgba(139, 92, 246, 0.5);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.2);
+}
+
+.option-icon {
+  font-size: 1.6rem;
+}
+
+.option-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.option-title {
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: #ffffff;
+}
+
+.option-desc {
+  font-size: 0.76rem;
+  color: #8b949e;
+}
+
 .copyright-fix-box {
   background: rgba(16, 185, 129, 0.08);
   border: 1px solid rgba(16, 185, 129, 0.2);

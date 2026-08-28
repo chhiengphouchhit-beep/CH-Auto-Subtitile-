@@ -31,63 +31,9 @@
         <input id="file-input-topbar" type="file" accept="video/*,audio/*" hidden />
       </label>
 
-      <div class="export-dropdown" id="export-dropdown">
-        <button id="export-main-btn" class="btn btn-primary export-trigger" disabled>
-          <span>Export Options</span>
-          <span class="caret">▾</span>
-        </button>
-        <div class="dropdown-menu" id="export-menu">
-          <button class="dropdown-item" id="export-srt-btn">
-            <span class="icon">📄</span>
-            <div class="item-text">
-              <span class="item-title">Export .SRT Subtitles</span>
-              <span class="item-desc">ឯកសារ Caption សម្រាប់ CapCut, Premiere...</span>
-            </div>
-          </button>
-          <button class="dropdown-item" id="export-vtt-btn">
-            <span class="icon">🌐</span>
-            <div class="item-text">
-              <span class="item-title">Export .VTT Subtitles</span>
-              <span class="item-desc">ឯកសារ WebVTT សម្រាប់ Web & HTML5 Players</span>
-            </div>
-          </button>
-          <button class="dropdown-item" id="export-ass-btn">
-            <span class="icon">🎨</span>
-            <div class="item-text">
-              <span class="item-title">Export .ASS Subtitles</span>
-              <span class="item-desc">ឯកសារ SubStation Alpha ជាមួយ Font & Style ស្រាប់</span>
-            </div>
-          </button>
-          <button class="dropdown-item" id="export-txt-btn">
-            <span class="icon">📝</span>
-            <div class="item-text">
-              <span class="item-title">Export Plain Text (.TXT)</span>
-              <span class="item-desc">ទាញយកតែអត្ថបទសុទ្ធ (គ្មានលេខវិនាទី)</span>
-            </div>
-          </button>
-          <button class="dropdown-item" id="export-video-btn">
-            <span class="icon">🎬</span>
-            <div class="item-text">
-              <span class="item-title">Export Video with Captions</span>
-              <span class="item-desc">Render Caption រួចជាស្រេចលើវីដេអូ (.MP4)</span>
-            </div>
-          </button>
-          <button class="dropdown-item" id="export-greenscreen-btn">
-            <span class="icon">🟩</span>
-            <div class="item-text">
-              <span class="item-title">Export Green Screen Video</span>
-              <span class="item-desc">វីដេអូ Green Screen (#00FF00) សម្រាប់យកទៅ Key ក្នុង CapCut/Premiere</span>
-            </div>
-          </button>
-          <button class="dropdown-item" id="export-screenshot-btn">
-            <span class="icon">📸</span>
-            <div class="item-text">
-              <span class="item-title">Export Screenshot</span>
-              <span class="item-desc">រូបភាព Screenshot រួមជាមួយ Caption (.PNG)</span>
-            </div>
-          </button>
-        </div>
-      </div>
+      <button id="export-main-btn" class="btn btn-primary export-trigger" disabled title=" ជ្រើសរើសទម្រង់ Export">
+        <span>🚀 Export Options</span>
+      </button>
     </div>
   </header>
 
@@ -570,6 +516,72 @@
             <!-- Dynamically populated by app.js -->
           </tbody>
         </table>
+      </div>
+  <!-- Pro Export Selection Modal -->
+  <div id="export-selector-modal" class="export-modal-backdrop" hidden>
+    <div class="export-modal-card selector-card">
+      <div class="selector-card-head">
+        <h3 class="selector-card-title">🚀 Select Export Format (ជ្រើសរើសទម្រង់ Export)</h3>
+        <button type="button" id="close-export-selector-btn" class="btn btn-ghost btn-xs">✖</button>
+      </div>
+      <p class="selector-card-sub">ជ្រើសរើសទម្រង់វីដេអូ ឬ ឯកសារ Subtitle ដែលបងចង់ Export ៖</p>
+
+      <div class="export-options-grid">
+        <button type="button" class="export-option-card" id="export-video-btn">
+          <span class="option-icon">🎬</span>
+          <div class="option-info">
+            <span class="option-title">Export MP4 Video</span>
+            <span class="option-desc">Render Caption រួចជាស្រេចលើវីដេអូ (.MP4)</span>
+          </div>
+        </button>
+
+        <button type="button" class="export-option-card" id="export-greenscreen-btn">
+          <span class="option-icon">🟩</span>
+          <div class="option-info">
+            <span class="option-title">Export Green Screen MP4</span>
+            <span class="option-desc">វីដេអូ Green Screen (#00FF00) សម្រាប់ CapCut / Premiere</span>
+          </div>
+        </button>
+
+        <button type="button" class="export-option-card" id="export-srt-btn">
+          <span class="option-icon">📝</span>
+          <div class="option-info">
+            <span class="option-title">Export Subtitles (.SRT)</span>
+            <span class="option-desc">ឯកសារ Subtitle ស្ដង់ដារសម្រាប់ទាញយក</span>
+          </div>
+        </button>
+
+        <button type="button" class="export-option-card" id="export-vtt-btn">
+          <span class="option-icon">🌐</span>
+          <div class="option-info">
+            <span class="option-title">Export WebVTT (.VTT)</span>
+            <span class="option-desc">ឯកសារ Subtitle សម្រាប់ Web Player</span>
+          </div>
+        </button>
+
+        <button type="button" class="export-option-card" id="export-ass-btn">
+          <span class="option-icon">🎨</span>
+          <div class="option-info">
+            <span class="option-title">Export Styled Subtitles (.ASS)</span>
+            <span class="option-desc">ឯកសារ Subtitle បញ្ចូល Font & Style ស្រាប់</span>
+          </div>
+        </button>
+
+        <button type="button" class="export-option-card" id="export-txt-btn">
+          <span class="option-icon">📄</span>
+          <div class="option-info">
+            <span class="option-title">Export Plain Text (.TXT)</span>
+            <span class="option-desc">អត្ថបទ Caption សុទ្ធគ្មាន Timecode</span>
+          </div>
+        </button>
+
+        <button type="button" class="export-option-card" id="export-screenshot-btn">
+          <span class="option-icon">📸</span>
+          <div class="option-info">
+            <span class="option-title">Export Screenshot</span>
+            <span class="option-desc">រូបភាព Screenshot រួមជាមួយ Caption (.PNG)</span>
+          </div>
+        </button>
       </div>
     </div>
   </div>

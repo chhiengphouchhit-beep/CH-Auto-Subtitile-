@@ -843,21 +843,40 @@ document.addEventListener('keydown', (e) => {
 // Export Dropdown & Handlers
 // ---------------------------------------------------------------------------
 
-el.exportMainBtn.addEventListener('click', (e) => {
-  e.stopPropagation();
-  if (el.exportMainBtn.disabled) return;
-  el.exportDropdown.classList.toggle('is-open');
-});
-
-document.addEventListener('click', (e) => {
-  if (!el.exportDropdown.contains(e.target)) {
-    el.exportDropdown.classList.remove('is-open');
+function openExportSelectorModal() {
+  const modal = document.getElementById('export-selector-modal');
+  if (modal) {
+    modal.hidden = false;
+    modal.removeAttribute('hidden');
+    modal.style.display = 'flex';
   }
-});
+}
+
+function closeExportSelectorModal() {
+  const modal = document.getElementById('export-selector-modal');
+  if (modal) {
+    modal.hidden = true;
+    modal.setAttribute('hidden', '');
+    modal.style.display = 'none';
+  }
+}
+
+if (el.exportMainBtn) {
+  el.exportMainBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (el.exportMainBtn.disabled) return;
+    openExportSelectorModal();
+  });
+}
+
+const closeExportSelectorBtn = document.getElementById('close-export-selector-btn');
+if (closeExportSelectorBtn) {
+  closeExportSelectorBtn.addEventListener('click', closeExportSelectorModal);
+}
 
 // Option 1: Export .SRT Subtitles
 el.exportSrtBtn.addEventListener('click', async () => {
-  el.exportDropdown.classList.remove('is-open');
+  closeExportSelectorModal();
   try {
     const res = await fetch('/api/export-srt', {
       method: 'POST',
@@ -881,7 +900,7 @@ el.exportSrtBtn.addEventListener('click', async () => {
 // Option 1B: Export .VTT Subtitles
 if (el.exportVttBtn) {
   el.exportVttBtn.addEventListener('click', () => {
-    el.exportDropdown.classList.remove('is-open');
+    closeExportSelectorModal();
     if (state.captions.length === 0) return setStatus('មិនទាន់មាន Caption សម្រាប់ Export', 'error');
 
     let vttContent = 'WEBVTT\n\n';
@@ -905,7 +924,7 @@ if (el.exportVttBtn) {
 // Option 1D: Export Plain Text (.TXT)
 if (el.exportTxtBtn) {
   el.exportTxtBtn.addEventListener('click', () => {
-    el.exportDropdown.classList.remove('is-open');
+    closeExportSelectorModal();
     if (state.captions.length === 0) return setStatus('មិនទាន់មាន Caption សម្រាប់ Export', 'error');
 
     const txtContent = state.captions.map((c) => c.text.trim()).join('\n');
@@ -933,7 +952,7 @@ function fmtVttTime(seconds) {
 // Option 1C: Export .ASS Subtitles
 if (el.exportAssBtn) {
   el.exportAssBtn.addEventListener('click', async () => {
-    el.exportDropdown.classList.remove('is-open');
+    closeExportSelectorModal();
     if (state.captions.length === 0) return setStatus('មិនទាន់មាន Caption សម្រាប់ Export', 'error');
 
     try {
@@ -1204,7 +1223,7 @@ if (el.logoPosSelect) {
 
 // Option 2: Export Video with Burned-In Captions (.MP4)
 el.exportVideoBtn.addEventListener('click', async () => {
-  el.exportDropdown.classList.remove('is-open');
+  closeExportSelectorModal();
   if (!state.uploadId) return setStatus('សូម Upload វីដេអូជាមុនសិន', 'error');
 
   setStatus('កំពុង Render វីដេអូជាមួយ Caption (សូមរង់ចាំបន្តិច)...');
@@ -1247,7 +1266,7 @@ el.exportVideoBtn.addEventListener('click', async () => {
 
 // Option 3: Export Green Screen Video (.MP4)
 el.exportGreenscreenBtn.addEventListener('click', async () => {
-  el.exportDropdown.classList.remove('is-open');
+  closeExportSelectorModal();
   if (!state.uploadId) return setStatus('សូម Upload វីដេអូជាមុនសិន', 'error');
 
   setStatus('កំពុង Render វីដេអូ Green Screen (#00FF00)...');
@@ -1290,7 +1309,7 @@ el.exportGreenscreenBtn.addEventListener('click', async () => {
 
 // Option 4: Export Screenshot with Overlay (.PNG)
 el.exportScreenshotBtn.addEventListener('click', () => {
-  el.exportDropdown.classList.remove('is-open');
+  closeExportSelectorModal();
   if (!el.video.videoWidth) return setStatus('មិនទាន់មានវីដេអូ playable', 'error');
 
   const canvas = document.createElement('canvas');
