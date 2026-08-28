@@ -83,6 +83,8 @@ const el = {
   seekBackBtn: document.getElementById('seek-back-btn'),
   seekFwdBtn: document.getElementById('seek-fwd-btn'),
   addCaptionBtn: document.getElementById('add-caption-btn'),
+  captionCount: document.getElementById('caption-count'),
+  captionsList: document.getElementById('captions-list'),
   captionSearchInput: document.getElementById('caption-search-input'),
   aspectRatioSelect: document.getElementById('aspect-ratio-select'),
   trimStartInput: document.getElementById('trim-start-input'),
@@ -423,9 +425,9 @@ function fmtTime(t) {
 }
 
 function renderCaptions() {
-  el.captionCount.textContent = state.captions.length;
+  if (el.captionCount) el.captionCount.textContent = state.captions.length;
+  if (!el.captionsList) return;
   el.captionsList.innerHTML = '';
-  el.exportMainBtn.disabled = state.captions.length === 0;
 
   if (state.captions.length === 0) {
     el.captionsList.innerHTML = '<p class="empty-hint">Caption នឹងបង្ហាញនៅទីនេះ បន្ទាប់ពី Generate។</p>';
