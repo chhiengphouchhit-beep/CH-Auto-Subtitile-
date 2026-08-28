@@ -873,6 +873,15 @@ if (closeExportSelectorBtn) {
   closeExportSelectorBtn.addEventListener('click', closeExportSelectorModal);
 }
 
+const exportSelectorModal = document.getElementById('export-selector-modal');
+if (exportSelectorModal) {
+  exportSelectorModal.addEventListener('click', (e) => {
+    if (e.target === exportSelectorModal) {
+      closeExportSelectorModal();
+    }
+  });
+}
+
 // Option 1: Export .SRT Subtitles
 if (el.exportSrtBtn) {
   el.exportSrtBtn.addEventListener('click', async () => {
