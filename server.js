@@ -258,76 +258,86 @@ const storage = multer.diskStorage({
     cb(null, `source${ext}`);
   },
 });
-const upload = multer({ storage, limits: { fileSize: 500 * 1024 * 1024 } });
+const upload = multer({ storage, limits: { fileSize: 2000 * 1024 * 1024 } });
 
-app.post('/api/upload', upload.single('video'), async (req, res) => {
-  try {
-    if (!req.file) return res.status(400).json({ error: 'No file received.' });
-
-    const id = req.uploadId;
-    const dir = path.join(UPLOAD_ROOT, id);
-    const sourcePath = req.file.path;
-    const audioMp3Path = path.join(dir, 'audio.mp3');
-    const audioPath = path.join(dir, 'audio.wav');
-    const previewPath = path.join(dir, 'preview.mp4');
-
-    // 1. Extract audio wav & mp3 for Gemini (16kHz mono 64k for ultra-fast cloud transfer)
-    try {
-      await execFileAsync(FFMPEG_PATH, [
-        '-y', '-i', sourcePath,
-        '-ac', '1', '-ar', '16000', '-b:a', '64k', '-vn',
-        audioMp3Path,
-      ]);
-    } catch (errMp3) {
-      console.warn('Audio MP3 extraction warning:', errMp3.message);
+app.post('/api/upload', (req, res) => {
+  upload.single('video')(req, res, async (err) => {
+    if (err) {
+      console.error('upload multer error:', err);
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        return res.status(413).json({ error: 'ទំហំវីដេអូធំពេក (លើសពី 2GB)! សូមកាត់បន្ថយទំហំ ឬ ជ្រើសរើសវីដេអូផ្សេង។' });
+      }
+      return res.status(400).json({ error: `Upload error: ${err.message}` });
     }
 
     try {
-      await execFileAsync(FFMPEG_PATH, [
-        '-y', '-i', sourcePath,
-        '-ac', '1', '-ar', '16000', '-vn',
-        audioPath,
-      ]);
-    } catch (errWav) {
-      console.warn('Audio WAV extraction warning:', errWav.message);
+      if (!req.file) return res.status(400).json({ error: 'No file received.' });
+
+      const id = req.uploadId;
+      const dir = path.join(UPLOAD_ROOT, id);
+      const sourcePath = req.file.path;
+      const audioMp3Path = path.join(dir, 'audio.mp3');
+      const audioPath = path.join(dir, 'audio.wav');
+      const previewPath = path.join(dir, 'preview.mp4');
+
+      // 1. Extract audio wav & mp3 for Gemini (16kHz mono 64k for ultra-fast cloud transfer)
+      try {
+        await execFileAsync(FFMPEG_PATH, [
+          '-y', '-i', sourcePath,
+          '-ac', '1', '-ar', '16000', '-b:a', '64k', '-vn',
+          audioMp3Path,
+        ]);
+      } catch (errMp3) {
+        console.warn('Audio MP3 extraction warning:', errMp3.message);
+      }
+
+      try {
+        await execFileAsync(FFMPEG_PATH, [
+          '-y', '-i', sourcePath,
+          '-ac', '1', '-ar', '16000', '-vn',
+          audioPath,
+        ]);
+      } catch (errWav) {
+        console.warn('Audio WAV extraction warning:', errWav.message);
+      }
+
+      // 2. Transcode / remux to universal browser-compatible preview.mp4 (H.264 + YUV420P)
+      try {
+        await execFileAsync(FFMPEG_PATH, [
+          '-y', '-i', sourcePath,
+          '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'superfast', '-crf', '23',
+          '-c:a', 'aac', '-b:a', '128k',
+          previewPath,
+        ]);
+      } catch (e) {
+        console.warn('Preview transcoding warning, fallback to source:', e.message);
+      }
+
+      const finalPreview = fs.existsSync(previewPath) ? 'preview.mp4' : path.basename(sourcePath);
+
+      let duration = 0;
+      try {
+        const { stdout } = await execFileAsync(FFPROBE_PATH, [
+          '-v', 'error',
+          '-show_entries', 'format=duration',
+          '-of', 'default=noprint_wrappers=1:nokey=1',
+          sourcePath,
+        ]);
+        duration = parseFloat(stdout.trim()) || 0;
+      } catch (eProb) {
+        console.warn('FFprobe duration warning:', eProb.message);
+      }
+
+      res.json({
+        id,
+        videoUrl: `/media/${id}/${finalPreview}`,
+        duration,
+      });
+    } catch (err) {
+      console.error('upload failed:', err);
+      res.status(500).json({ error: 'Upload or audio extraction failed.', detail: String(err.message || err) });
     }
-
-    // 2. Transcode / remux to universal browser-compatible preview.mp4 (H.264 + YUV420P)
-    try {
-      await execFileAsync(FFMPEG_PATH, [
-        '-y', '-i', sourcePath,
-        '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'superfast', '-crf', '23',
-        '-c:a', 'aac', '-b:a', '128k',
-        previewPath,
-      ]);
-    } catch (e) {
-      console.warn('Preview transcoding warning, fallback to source:', e.message);
-    }
-
-    const finalPreview = fs.existsSync(previewPath) ? 'preview.mp4' : path.basename(sourcePath);
-
-    let duration = 0;
-    try {
-      const { stdout } = await execFileAsync(FFPROBE_PATH, [
-        '-v', 'error',
-        '-show_entries', 'format=duration',
-        '-of', 'default=noprint_wrappers=1:nokey=1',
-        sourcePath,
-      ]);
-      duration = parseFloat(stdout.trim()) || 0;
-    } catch (eProb) {
-      console.warn('FFprobe duration warning:', eProb.message);
-    }
-
-    res.json({
-      id,
-      videoUrl: `/media/${id}/${finalPreview}`,
-      duration,
-    });
-  } catch (err) {
-    console.error('upload failed:', err);
-    res.status(500).json({ error: 'Upload or audio extraction failed.', detail: String(err.message || err) });
-  }
+  });
 });
 
 // ---------------------------------------------------------------------------
@@ -340,7 +350,7 @@ app.post('/api/upload', upload.single('video'), async (req, res) => {
 
 async function detectSilences(audioPath) {
   try {
-    const { stderr } = await execFileAsync('ffmpeg', [
+    const { stderr } = await execFileAsync(FFMPEG_PATH, [
       '-i', audioPath,
       '-af', 'silencedetect=noise=-30dB:d=0.15',
       '-f', 'null', '-',
@@ -1195,6 +1205,21 @@ app.get('/', (req, res) => {
 
 app.get('/api/health', (req, res) => {
   res.json({ ok: true, geminiConfigured: Boolean(GEMINI_API_KEY), model: GEMINI_MODEL });
+});
+
+// Always return JSON for API 404s, NEVER HTML!
+app.all('/api/*', (req, res) => {
+  res.status(404).json({ error: `API endpoint not found: ${req.method} ${req.url}` });
+});
+
+// Global Express error handling middleware to always return JSON, NEVER HTML!
+app.use((err, req, res, next) => {
+  console.error('Unhandled server error:', err);
+  if (res.headersSent) return next(err);
+  res.status(err.status || err.statusCode || 500).json({
+    error: err.message || 'Server error occurred.',
+    detail: String(err.stack || err)
+  });
 });
 
 if (process.env.VERCEL) {

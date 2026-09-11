@@ -132,6 +132,26 @@ function setStatus(msg, kind) {
   el.status.className = 'status-line' + (kind ? ` is-${kind}` : '');
 }
 
+// Safe JSON parser that never throws "Unexpected token < in JSON"
+async function parseJsonResponse(res) {
+  const text = await res.text();
+  try {
+    const data = JSON.parse(text);
+    if (!res.ok) {
+      throw new Error(data.error || data.detail || `Server error (${res.status})`);
+    }
+    return data;
+  } catch (e) {
+    if (e.message && !e.message.includes('JSON')) {
+      throw e;
+    }
+    if (!res.ok) {
+      throw new Error(`Server Error (${res.status}): ${res.statusText || 'Unable to connect'}`);
+    }
+    throw new Error('ទិន្នន័យពី Server មិនត្រឹមត្រូវ (Invalid response).');
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Health / model badge
 // ---------------------------------------------------------------------------
@@ -139,7 +159,7 @@ function setStatus(msg, kind) {
 async function checkHealth() {
   try {
     const r = await fetch('/api/health');
-    const info = await r.json();
+    const info = await parseJsonResponse(r);
     if (el.modelBadge) {
       el.modelBadge.textContent = info.geminiConfigured
         ? `Gemini: ${info.model}`
@@ -175,8 +195,7 @@ async function handleFileUpload(file) {
 
   try {
     const res = await fetch('/api/upload', { method: 'POST', body: form });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Upload failed.');
+    const data = await parseJsonResponse(res);
 
     state.uploadId = data.id;
     state.duration = data.duration;
@@ -409,8 +428,7 @@ el.generateBtn.addEventListener('click', async () => {
         language: el.languageSelect ? el.languageSelect.value : 'km',
       }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Transcription failed.');
+    const data = await parseJsonResponse(res);
 
     state.captions = data.captions;
     finishGenerateAnimation();
@@ -1205,8 +1223,7 @@ if (scanCopyrightBtn) {
         body: JSON.stringify({ id: state.uploadId })
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Copyright check failed.');
+      const data = await parseJsonResponse(res);
 
       const { tiktok, facebook, youtube } = data.platforms || {};
 
@@ -1305,8 +1322,7 @@ if (el.bgmFileInput) {
 
     try {
       const res = await fetch('/api/upload-media', { method: 'POST', body: form });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'BGM upload failed.');
+      const data = await parseJsonResponse(res);
       state.editOptions.bgmFilename = data.file.filename;
       if (el.bgmFilename) el.bgmFilename.textContent = `🎵 ${file.name}`;
       setStatus('បានផ្ទុកឡើង BGM ជោគជ័យ!', 'ok');
@@ -1328,8 +1344,7 @@ if (el.logoFileInput) {
 
     try {
       const res = await fetch('/api/upload-media', { method: 'POST', body: form });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Logo upload failed.');
+      const data = await parseJsonResponse(res);
       state.editOptions.logoFilename = data.file.filename;
       if (el.logoFilename) el.logoFilename.textContent = `🖼️ ${file.name}`;
       setStatus('បានផ្ទុកឡើង Watermark Logo ជោគជ័យ!', 'ok');
@@ -1374,7 +1389,7 @@ if (el.exportVideoBtn) {
         }),
       });
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
+        const errData = await parseJsonResponse(res).catch((e) => ({ error: e.message }));
         throw new Error(errData.error || errData.detail || 'Export Video failed.');
       }
       const blob = await res.blob();
@@ -1423,7 +1438,7 @@ if (el.exportGreenscreenBtn) {
         }),
       });
       if (!res.ok) {
-        const errData = await res.json().catch(() => ({}));
+        const errData = await parseJsonResponse(res).catch((e) => ({ error: e.message }));
         throw new Error(errData.error || errData.detail || 'Export Green Screen failed.');
       }
       const blob = await res.blob();
@@ -1540,7 +1555,7 @@ async function verifyCurrentKey() {
   const key = getAccessKey();
   try {
     const res = await fetch(`/api/access/verify?key=${encodeURIComponent(key)}`);
-    const data = await res.json();
+    const data = await parseJsonResponse(res);
     if (data.valid) {
       if (el.keyStatusBadge) {
         el.keyStatusBadge.textContent = data.isAdmin ? '👑 CHHIT Admin' : `✓ ${data.userName || 'Approved'}`;
@@ -1568,7 +1583,7 @@ async function fetchAndRenderAdminKeys() {
       headers: { 'Content-Type': 'application/json', 'X-Access-Key': key },
       body: JSON.stringify({ action: 'list' }),
     });
-    const data = await res.json();
+    const data = await parseJsonResponse(res);
     if (el.adminOnlineCount) el.adminOnlineCount.textContent = data.onlineCount || 1;
 
     if (el.adminOnlineUsersList) {
@@ -1626,8 +1641,7 @@ async function manageKeyAction(action, keyToManage) {
       headers: { 'Content-Type': 'application/json', 'X-Access-Key': adminKey },
       body: JSON.stringify({ action, keyToManage }),
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error || 'Action failed.');
+    const data = await parseJsonResponse(res);
     fetchAndRenderAdminKeys();
   } catch (err) {
     alert(err.message);
@@ -1694,8 +1708,7 @@ if (el.createKeyBtn) {
         headers: { 'Content-Type': 'application/json', 'X-Access-Key': adminKey },
         body: JSON.stringify({ action: 'create', userName, limit }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || 'Key creation failed.');
+      const data = await parseJsonResponse(res);
       if (el.newUserName) el.newUserName.value = '';
       alert(`✨ បានបង្កើត Access Key ជោគជ័យ:\n\nKey: ${data.key}\n\n(សូមផ្ញើ Key នេះទៅកាន់ User របស់អ្នក!)`);
       fetchAndRenderAdminKeys();
@@ -1718,7 +1731,7 @@ async function sendHeartbeat() {
       headers: { 'Content-Type': 'application/json', 'X-Access-Key': key },
       body: JSON.stringify({ sessionId: clientSessionId, accessKey: key }),
     });
-    const data = await res.json();
+    const data = await parseJsonResponse(res);
     if (el.onlineCountText) {
       el.onlineCountText.textContent = `${data.onlineCount || 1} Online`;
     }
