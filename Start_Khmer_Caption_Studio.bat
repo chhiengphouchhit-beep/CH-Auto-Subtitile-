@@ -29,16 +29,13 @@ if not exist "node_modules\express" (
     call npm install
 )
 
-set "IS_RUNNING=0"
-powershell -Command "try { $r = (Invoke-WebRequest -Uri 'http://localhost:1100/api/health' -UseBasicParsing -TimeoutSec 1).Content; if ($r -like '*ok*') { exit 0 } else { exit 1 } } catch { exit 1 }" >nul 2>&1
-if %errorlevel% equ 0 set "IS_RUNNING=1"
-
-if "%IS_RUNNING%"=="1" (
-    echo ⚡ Khmer Caption Studio Server is already active and running!
+netstat -ano | findstr :1100 >nul 2>&1
+if %errorlevel% equ 0 (
+    echo ⚡ Khmer Caption Studio Server is already active!
 ) else (
     echo 🚀 Launching background server...
     start /b "" "%NODE_EXEC%" "%~dp0server.js" > server_desktop.log 2>&1
-    timeout /t 3 /nobreak >nul
+    timeout /t 1 /nobreak >nul
 )
 
 echo ✨ Launching Desktop App Window...

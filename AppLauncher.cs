@@ -1,7 +1,7 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -9,15 +9,15 @@ namespace KhmerCaptionStudioLauncher
 {
     static class Program
     {
-        static bool CheckHealth(int timeoutMs)
+        static bool IsServerReady()
         {
             try {
-                HttpWebRequest req = (HttpWebRequest)WebRequest.Create("http://localhost:1100/api/health");
-                req.Timeout = timeoutMs;
-                using (WebResponse resp = req.GetResponse())
-                using (StreamReader reader = new StreamReader(resp.GetResponseStream())) {
-                    string res = reader.ReadToEnd();
-                    return res != null && res.Contains("ok");
+                using (TcpClient tcp = new TcpClient()) {
+                    IAsyncResult ar = tcp.BeginConnect("127.0.0.1", 1100, null, null);
+                    bool ok = ar.AsyncWaitHandle.WaitOne(150);
+                    if (!ok) return false;
+                    tcp.EndConnect(ar);
+                    return true;
                 }
             } catch {
                 return false;
@@ -31,65 +31,44 @@ namespace KhmerCaptionStudioLauncher
                 string baseDir = AppDomain.CurrentDomain.BaseDirectory;
                 string appDir = null;
 
-                // 1. Resolve project directory (supports running from Desktop, root folder, or anywhere)
                 if (File.Exists(Path.Combine(baseDir, "server.js"))) {
                     appDir = baseDir;
                 } else if (File.Exists(@"D:\khmer-caption-studio\server.js")) {
                     appDir = @"D:\khmer-caption-studio";
-                } else {
-                    // Check parent directories
-                    DirectoryInfo cur = new DirectoryInfo(baseDir);
-                    while (cur != null && cur.Parent != null) {
-                        cur = cur.Parent;
-                        if (File.Exists(Path.Combine(cur.FullName, "khmer-caption-studio", "server.js"))) {
-                            appDir = Path.Combine(cur.FullName, "khmer-caption-studio");
-                            break;
-                        }
-                    }
                 }
 
-                if (string.IsNullOrEmpty(appDir) || !File.Exists(Path.Combine(appDir, "server.js"))) {
-                    MessageBox.Show(
-                        "រកមិនឃើញ Folder កម្មវិធី D:\\khmer-caption-studio ឡើយ!\nសូមប្រាកដថា Folder khmer-caption-studio នៅលើ Drive D: នៅដដែល។",
-                        "Khmer Caption Studio",
-                        MessageBoxButtons.OK,
-                        MessageBoxIcon.Warning
-                    );
+                if (string.IsNullOrEmpty(appDir)) {
+                    MessageBox.Show("រកមិនឃើញ Folder D:\\khmer-caption-studio ឡើយ!", "Khmer Caption Studio", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
                 string serverFile = Path.Combine(appDir, "server.js");
                 string nodeExe = Path.Combine(appDir, "bin", "node.exe");
+                if (!File.Exists(nodeExe)) nodeExe = "node";
 
-                if (!File.Exists(nodeExe)) {
-                    nodeExe = "node";
-                }
+                // Fast check: Is server already listening? (Takes ~2ms)
+                bool isRunning = IsServerReady();
 
-                // 2. Check if server is already running on port 1100
-                bool isRunning = CheckHealth(1500);
-
-                // 3. Start server if not running
                 if (!isRunning) {
-                    ProcessStartInfo serverSi = new ProcessStartInfo();
-                    serverSi.FileName = nodeExe;
-                    serverSi.Arguments = "\"" + serverFile + "\"";
-                    serverSi.WorkingDirectory = appDir;
-                    serverSi.CreateNoWindow = true;
-                    serverSi.UseShellExecute = false;
-                    serverSi.WindowStyle = ProcessWindowStyle.Hidden;
+                    // Start server silently in background
+                    ProcessStartInfo serverSi = new ProcessStartInfo {
+                        FileName = nodeExe,
+                        Arguments = "\"" + serverFile + "\"",
+                        WorkingDirectory = appDir,
+                        CreateNoWindow = true,
+                        UseShellExecute = false,
+                        WindowStyle = ProcessWindowStyle.Hidden
+                    };
                     Process.Start(serverSi);
 
-                    // Wait for server to become healthy (up to 10 seconds)
-                    for (int i = 0; i < 20; i++) {
-                        Thread.Sleep(500);
-                        if (CheckHealth(1000)) {
-                            isRunning = true;
-                            break;
-                        }
+                    // Rapid check (polls every 100ms, ready in ~300ms)
+                    for (int i = 0; i < 30; i++) {
+                        Thread.Sleep(100);
+                        if (IsServerReady()) break;
                     }
                 }
 
-                // 4. Launch Desktop App Window (Edge App mode -> Chrome App mode -> Default Browser)
+                // Launch Desktop App Window immediately
                 string edgePath = @"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe";
                 if (!File.Exists(edgePath)) {
                     edgePath = @"C:\Program Files\Microsoft\Edge\Application\msedge.exe";
@@ -114,12 +93,7 @@ namespace KhmerCaptionStudioLauncher
                 Process.Start(appSi);
 
             } catch (Exception ex) {
-                MessageBox.Show(
-                    "Error launching Khmer Caption Studio: " + ex.Message,
-                    "Khmer Caption Studio",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error
-                );
+                MessageBox.Show("Error: " + ex.Message, "Khmer Caption Studio", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
     }
