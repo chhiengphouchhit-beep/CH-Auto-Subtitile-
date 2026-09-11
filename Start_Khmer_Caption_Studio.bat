@@ -29,9 +29,17 @@ if not exist "node_modules\express" (
     call npm install
 )
 
-echo 🚀 Launching background server...
-start /b "" "%NODE_EXEC%" "%~dp0server.js" > server_desktop.log 2>&1
+set "IS_RUNNING=0"
+powershell -Command "try { $r = (Invoke-WebRequest -Uri 'http://localhost:1100/api/health' -UseBasicParsing -TimeoutSec 1).Content; if ($r -like '*ok*') { exit 0 } else { exit 1 } } catch { exit 1 }" >nul 2>&1
+if %errorlevel% equ 0 set "IS_RUNNING=1"
 
-timeout /t 3 /nobreak >nul
+if "%IS_RUNNING%"=="1" (
+    echo ⚡ Khmer Caption Studio Server is already active and running!
+) else (
+    echo 🚀 Launching background server...
+    start /b "" "%NODE_EXEC%" "%~dp0server.js" > server_desktop.log 2>&1
+    timeout /t 3 /nobreak >nul
+)
+
 echo ✨ Launching Desktop App Window...
 start msedge --app=http://localhost:1100 || start chrome --app=http://localhost:1100 || start http://localhost:1100

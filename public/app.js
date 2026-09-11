@@ -165,6 +165,7 @@ async function handleFileUpload(file) {
   state.captions = [];
   state.editOptions.trimStart = 0;
   state.editOptions.trimEnd = 0;
+  try { localStorage.removeItem('khmer_caption_studio_backup'); } catch (e) {}
   if (el.captionOverlayText) el.captionOverlayText.textContent = '';
   renderCaptions();
 
@@ -196,6 +197,7 @@ if (el.fileInput) {
     if (el.fileInput.files && el.fileInput.files[0]) {
       handleFileUpload(el.fileInput.files[0]);
     }
+    el.fileInput.value = '';
   });
 }
 
@@ -205,8 +207,20 @@ if (fileInputTopbar) {
     if (fileInputTopbar.files && fileInputTopbar.files[0]) {
       handleFileUpload(fileInputTopbar.files[0]);
     }
+    fileInputTopbar.value = '';
   });
 }
+
+// Global Drag & Drop Support
+window.addEventListener('dragover', (e) => {
+  e.preventDefault();
+});
+window.addEventListener('drop', (e) => {
+  e.preventDefault();
+  if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
+    handleFileUpload(e.dataTransfer.files[0]);
+  }
+});
 
 const videoShell = document.querySelector('.video-shell');
 if (videoShell) {
@@ -220,9 +234,6 @@ if (videoShell) {
   videoShell.addEventListener('drop', (e) => {
     e.preventDefault();
     videoShell.classList.remove('drag-over');
-    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileUpload(e.dataTransfer.files[0]);
-    }
   });
 }
 
@@ -378,7 +389,11 @@ function stopGenerateAnimation() {
 }
 
 el.generateBtn.addEventListener('click', async () => {
-  if (!state.uploadId) return;
+  if (!state.uploadId) {
+    setStatus('សូមជ្រើសរើស ឬ ទម្លាក់វីដេអូជាមុនសិន!', 'error');
+    alert('សូមជ្រើសរើស ឬ ទម្លាក់វីដេអូ (Upload Video) ជាមុនសិន ទើបអាចបង្កើត Caption បាន!');
+    return;
+  }
   setStatus('កំពុងបង្កើត caption…');
   el.generateBtn.disabled = true;
   startGenerateAnimation();
@@ -504,6 +519,7 @@ if (clearAllCaptionsBtn) {
     if (state.captions.length === 0) return setStatus('គ្មាន Caption សម្រាប់លុបឡើយ', 'error');
     if (confirm('តើបងប្រាកដថាចង់លុប Caption ទាំងអស់ចេញមែនទេ?')) {
       state.captions = [];
+      try { localStorage.removeItem('khmer_caption_studio_backup'); } catch (e) {}
       if (el.captionOverlayText) el.captionOverlayText.textContent = '';
       renderCaptions();
       setStatus('បានលុប Caption ទាំងអស់រួចរាល់!', 'ok');
@@ -1334,7 +1350,11 @@ if (el.logoPosSelect) {
 if (el.exportVideoBtn) {
   el.exportVideoBtn.addEventListener('click', async () => {
     closeExportSelectorModal();
-    if (!state.uploadId) return setStatus('សូម Upload វីដេអូជាមុនសិន', 'error');
+    if (!state.uploadId) {
+      setStatus('សូម Upload វីដេអូជាមុនសិន!', 'error');
+      alert('សូមផ្ទុកឡើងវីដេអូ (Upload Video) ជាមុនសិន ទើបអាច Export វីដេអូបាន!');
+      return;
+    }
 
     setStatus('កំពុង Render វីដេអូជាមួយ Caption (សូមរង់ចាំបន្តិច)...');
     if (el.exportMainBtn) el.exportMainBtn.disabled = true;
@@ -1379,7 +1399,11 @@ if (el.exportVideoBtn) {
 if (el.exportGreenscreenBtn) {
   el.exportGreenscreenBtn.addEventListener('click', async () => {
     closeExportSelectorModal();
-    if (!state.uploadId) return setStatus('សូម Upload វីដេអូជាមុនសិន', 'error');
+    if (!state.uploadId) {
+      setStatus('សូម Upload វីដេអូជាមុនសិន!', 'error');
+      alert('សូមផ្ទុកឡើងវីដេអូ (Upload Video) ជាមុនសិន ទើបអាច Export Green Screen បាន!');
+      return;
+    }
 
     setStatus('កំពុង Render វីដេអូ Green Screen (#00FF00)...');
     if (el.exportMainBtn) el.exportMainBtn.disabled = true;
