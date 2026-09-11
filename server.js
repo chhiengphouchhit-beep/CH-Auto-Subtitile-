@@ -280,57 +280,67 @@ app.post('/api/upload', (req, res) => {
       const audioPath = path.join(dir, 'audio.wav');
       const previewPath = path.join(dir, 'preview.mp4');
 
-      // 1. Extract audio wav & mp3 for Gemini (16kHz mono 64k for ultra-fast cloud transfer)
-      try {
-        await execFileAsync(FFMPEG_PATH, [
-          '-y', '-i', sourcePath,
-          '-ac', '1', '-ar', '16000', '-b:a', '64k', '-vn',
-          audioMp3Path,
-        ]);
-      } catch (errMp3) {
-        console.warn('Audio MP3 extraction warning:', errMp3.message);
+      const ext = path.extname(sourcePath).toLowerCase();
+      const isBrowserNative = ['.mp4', '.webm', '.mov', '.m4v', '.mp3', '.wav', '.ogg', '.m4a'].includes(ext);
+
+      // 1. Parallel Audio Extraction (ultra-fast single pass, only audio stream, no video re-encoding)
+      const audioExtraction = execFileAsync(FFMPEG_PATH, [
+        '-y', '-i', sourcePath,
+        '-vn',
+        '-ac', '1', '-ar', '16000', '-b:a', '64k',
+        audioMp3Path,
+      ]).then(() => {
+        // Also ensure audio.wav exists for compatibility
+        if (!fs.existsSync(audioPath) && fs.existsSync(audioMp3Path)) {
+          try { fs.copyFileSync(audioMp3Path, audioPath); } catch (e) {}
+        }
+      }).catch(async (err) => {
+        console.warn('Audio MP3 extraction failed, attempting fallback:', err.message);
+        try {
+          await execFileAsync(FFMPEG_PATH, [
+            '-y', '-i', sourcePath,
+            '-vn', '-ac', '1', '-ar', '16000',
+            audioPath,
+          ]);
+        } catch (e2) {
+          console.warn('Fallback audio extraction warning:', e2.message);
+        }
+      });
+
+      // 2. Parallel Fast Duration Probe (reads header in milliseconds)
+      const durationProbe = execFileAsync(FFPROBE_PATH, [
+        '-v', 'error',
+        '-show_entries', 'format=duration',
+        '-of', 'default=noprint_wrappers=1:nokey=1',
+        sourcePath,
+      ]).then(({ stdout }) => parseFloat(stdout.trim()) || 0)
+        .catch((eProb) => {
+          console.warn('FFprobe duration warning:', eProb.message);
+          return 0;
+        });
+
+      // 3. Fast preview: if already MP4/WebM/MOV, use source directly in 0ms!
+      // Only for non-browser formats (like MKV, AVI, FLV), do an ultra-fast stream remux (-c copy)
+      let previewFile = path.basename(sourcePath);
+      if (!isBrowserNative) {
+        try {
+          await execFileAsync(FFMPEG_PATH, [
+            '-y', '-i', sourcePath,
+            '-c', 'copy',
+            previewPath,
+          ]);
+          if (fs.existsSync(previewPath)) previewFile = 'preview.mp4';
+        } catch (eRemux) {
+          previewFile = path.basename(sourcePath);
+        }
       }
 
-      try {
-        await execFileAsync(FFMPEG_PATH, [
-          '-y', '-i', sourcePath,
-          '-ac', '1', '-ar', '16000', '-vn',
-          audioPath,
-        ]);
-      } catch (errWav) {
-        console.warn('Audio WAV extraction warning:', errWav.message);
-      }
-
-      // 2. Transcode / remux to universal browser-compatible preview.mp4 (H.264 + YUV420P)
-      try {
-        await execFileAsync(FFMPEG_PATH, [
-          '-y', '-i', sourcePath,
-          '-c:v', 'libx264', '-pix_fmt', 'yuv420p', '-preset', 'superfast', '-crf', '23',
-          '-c:a', 'aac', '-b:a', '128k',
-          previewPath,
-        ]);
-      } catch (e) {
-        console.warn('Preview transcoding warning, fallback to source:', e.message);
-      }
-
-      const finalPreview = fs.existsSync(previewPath) ? 'preview.mp4' : path.basename(sourcePath);
-
-      let duration = 0;
-      try {
-        const { stdout } = await execFileAsync(FFPROBE_PATH, [
-          '-v', 'error',
-          '-show_entries', 'format=duration',
-          '-of', 'default=noprint_wrappers=1:nokey=1',
-          sourcePath,
-        ]);
-        duration = parseFloat(stdout.trim()) || 0;
-      } catch (eProb) {
-        console.warn('FFprobe duration warning:', eProb.message);
-      }
+      // Wait for audio extraction and duration probe to finish concurrently
+      const [, duration] = await Promise.all([audioExtraction, durationProbe]);
 
       res.json({
         id,
-        videoUrl: `/media/${id}/${finalPreview}`,
+        videoUrl: `/media/${id}/${previewFile}`,
         duration,
       });
     } catch (err) {
